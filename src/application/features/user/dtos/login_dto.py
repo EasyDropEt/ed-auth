@@ -2,8 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class SomeEntity:
-    id: int
-    name: str
+class LoginDto:
     email: str
-    age: int
+    password: str
