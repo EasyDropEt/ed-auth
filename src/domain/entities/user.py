@@ -1,16 +1,13 @@
-from enum import StrEnum
-from typing import NotRequired, TypedDict
+from datetime import datetime
+from typing import TypedDict
 from uuid import UUID
 
 
-class UserRole(StrEnum):
-    BUSINESS = "business"
-    DRIVER = "driver"
-
-
 class User(TypedDict):
-    id: NotRequired[UUID]
-    name: str
+    id: UUID
+    first_name: str
+    last_name: str
     email: str
     password: str
-    role: UserRole
+    create_datetime: datetime
+    update_datetime: datetime

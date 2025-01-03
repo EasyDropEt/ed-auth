@@ -1,8 +1,8 @@
 import uuid
 
-from sqlalchemy import UUID, Column, Enum, String
+from sqlalchemy import UUID, Column, String
 
-from src.domain.entities.user import User, UserRole
+from src.domain.entities.user import User
 from src.infrastructure.persistence.db_client import DbClient
 from src.infrastructure.persistence.models.db_model import DbModel
 
@@ -16,7 +16,7 @@ class UserModel(db.Base, DbModel[User]):
     name = Column(String)
     email = Column(String)
     password = Column(String)
-    role = Column(Enum(UserRole))
+    role = Column(String)
 
     @classmethod
     def from_entity(cls, entity: User) -> "UserModel":

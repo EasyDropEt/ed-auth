@@ -6,7 +6,7 @@ from src.common.exception_helpers import ApplicationException
 from src.common.logging_helpers import get_logger
 from src.common.singleton_helpers import SingletonMeta
 from src.webapi.common.helpers import GenericResponse
-from src.webapi.controllers import user_controller
+from src.webapi.controllers import driver_controller
 
 LOG = get_logger()
 
@@ -31,7 +31,7 @@ class API(metaclass=SingletonMeta):
 
     def _include_routers(self) -> None:
         LOG.info("Including routers...")
-        self._app.include_router(user_controller.router)
+        self._app.include_router(driver_controller.ROUTER)
 
     def _contain_exceptions(self) -> None:
         @self._app.exception_handler(ApplicationException)
