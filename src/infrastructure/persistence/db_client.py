@@ -1,29 +1,23 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
+from pymongo import MongoClient
+from pymongo.collection import Collection
 
-from src.common.singleton_helpers import SingletonMeta
+from src.infrastructure.persistence.interfaces.abc_db_client import ABCDbClient
+
+UUID_REPRESENTATION = "standard"
 
 
-class DbClient(metaclass=SingletonMeta):
-    def __init__(self) -> None:
-        self._base = declarative_base()
-        self._engine = create_engine(
-            "postgresql://easydrop:easydrop@localhost:5432/easydrop"
+class DbClient(ABCDbClient):
+    def __init__(self, connection_string: str, db_name: str):
+        self._client = MongoClient(
+            connection_string,
+            uuidRepresentation=UUID_REPRESENTATION,
         )
-        self._is_started = False
+        self._db = self._client[db_name]
 
-    @property
-    def Base(self):
-        return self._base
+    def get_collection(self, collection_name: str) -> Collection:
+        return self._db[collection_name]
 
-    @property
-    def Engine(self):
-        assert self._is_started, "DbClient is not started"
-        return self._engine
+    def start(self): ...
 
-    def start(self) -> None:
-        self._base.metadata.create_all(self._engine)
-        self._is_started = True
-
-    def stop(self) -> None:
-        self._engine.dispose()
+    def stop(self):
+        self._client.close()

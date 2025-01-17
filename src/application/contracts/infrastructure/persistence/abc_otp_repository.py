@@ -1,13 +1,13 @@
 from abc import ABCMeta
 
-from ed_domain_model.entities import User
+from ed_domain_model.entities.otp import Otp
 
 from src.application.contracts.infrastructure.persistence.abc_generic_repository import (
     ABCGenericRepository,
 )
 
 
-class ABCUserRepository(
-    ABCGenericRepository[User],
+class ABCOtpRepository(
+    ABCGenericRepository[Otp],
     metaclass=ABCMeta,
 ): ...

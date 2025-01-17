@@ -1,27 +1,78 @@
+from typing import Annotated
+
+from fastapi import Depends
 from rmediator.mediator import Mediator
 
-from src.application.features.drivers.handlers.commands import (
-    CreateDriverCommandHandler,
-    LoginDriverCommandHandler,
+from src.application.contracts.infrastructure.persistence.abc_unit_of_work import (
+    ABCUnitOfWork,
 )
-from src.application.features.drivers.requests.commands import (
-    CreateDriverCommand,
-    LoginDriverCommand,
+from src.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
+from src.application.contracts.infrastructure.utils.abc_otp import ABCOtp
+from src.application.features.auth.handlers.commands import (
+    LoginUserCommandHandler,
+    VerifyTokenCommandHandler,
 )
+from src.application.features.auth.handlers.commands.create_user_command_handler import (
+    CreateUserCommandHandler,
+)
+from src.application.features.auth.handlers.commands.create_user_verify_command_handler import (
+    CreateUserVerifyCommandHandler,
+)
+from src.application.features.auth.handlers.commands.login_user_verify_command_handler import (
+    LoginUserVerifyCommandHandler,
+)
+from src.application.features.auth.requests.commands import (
+    LoginUserCommand,
+    VerifyTokenCommand,
+)
+from src.application.features.auth.requests.commands.create_user_command import (
+    CreateUserCommand,
+)
+from src.application.features.auth.requests.commands.create_user_verify_command import (
+    CreateUserVerifyCommand,
+)
+from src.application.features.auth.requests.commands.login_user_verify_command import (
+    LoginUserVerifyCommand,
+)
+from src.common.generic_helpers import get_config
+from src.common.typing.config import Config
 from src.infrastructure.persistence.db_client import DbClient
 from src.infrastructure.persistence.unit_of_work import UnitOfWork
+from src.infrastructure.utils.jwt import Jwt
+from src.infrastructure.utils.otp import Otp
 
 
-def mediator() -> Mediator:
-    # Dependencies
-    db_client = DbClient()
-    uow = UnitOfWork(db_client)
+def get_uow(config: Annotated[Config, Depends(get_config)]) -> ABCUnitOfWork:
+    db_client = DbClient(
+        config["mongo_db_connection_string"],
+        config["db_name"],
+    )
+    return UnitOfWork(db_client)
 
-    # Setup
+
+def get_jwt(config: Annotated[Config, Depends(get_config)]) -> ABCJwt:
+    return Jwt(config["jwt_secret"], config["jwt_algorithm"])
+
+
+def get_otp() -> ABCOtp:
+    return Otp()
+
+
+def mediator(
+    uow: Annotated[ABCUnitOfWork, Depends(get_uow)],
+    jwt: Annotated[ABCJwt, Depends(get_jwt)],
+    otp: Annotated[ABCOtp, Depends(get_otp)],
+) -> Mediator:
     mediator = Mediator()
 
-    mediator.register_handler(CreateDriverCommand, CreateDriverCommandHandler(uow))
-    mediator.register_handler(LoginDriverCommand, LoginDriverCommandHandler(uow))
+    auth_handlers = [
+        (CreateUserCommand, CreateUserCommandHandler(uow, otp)),
+        (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
+        (LoginUserCommand, LoginUserCommandHandler(uow, otp)),
+        (LoginUserVerifyCommand, LoginUserVerifyCommandHandler(uow, jwt)),
+        (VerifyTokenCommand, VerifyTokenCommandHandler(uow, jwt)),
+    ]
+    for request, handler in auth_handlers:
+        mediator.register_handler(request, handler)
 
-    db_client.start()
     return mediator

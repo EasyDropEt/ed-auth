@@ -1,83 +1,46 @@
 from typing import Any, Generic, TypeVar
 from uuid import UUID
 
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
-
 from src.application.contracts.infrastructure.persistence.abc_generic_repository import (
     ABCGenericRepository,
 )
-from src.common.logging_helpers import get_logger
+from src.common.exception_helpers import ApplicationException, Exceptions
 from src.infrastructure.persistence.db_client import DbClient
 from src.infrastructure.persistence.helpers import repository_class
-from src.infrastructure.persistence.models.db_model import DbModel
 
-T = TypeVar("T")
-
-LOG = get_logger()
+TEntity = TypeVar("TEntity")
 
 
 @repository_class
-class GenericRepository(ABCGenericRepository[T], Generic[T]):
-    def __init__(self, db: DbClient, model: type[DbModel]) -> None:
-        self._db = db
-        self._model = model
+class GenericRepository(Generic[TEntity], ABCGenericRepository[TEntity]):
+    def __init__(self, db: DbClient, collection: str) -> None:
+        self._db = db.get_collection(f"{collection}s")
+        self._collection = f"{collection[0].upper()}{collection[1:].lower()}"
 
-    def get_all(self, **filters: Any) -> list[T]:
-        with Session(bind=self._db.Engine) as session:
-            return list(
-                map(
-                    self._model.to_entity,
-                    session.query(self._model).filter_by(**filters).all(),
-                )
+    def get_all(self, **filters: Any) -> list[TEntity]:
+        return list(self._db.find(filters))
+
+    def get(self, **filters: Any) -> TEntity | None:
+        if entity := self._db.find_one(filters):
+            return entity
+
+        return None
+
+    def create(self, entity: TEntity) -> TEntity:
+        if exists := self._db.find_one(entity):
+            raise ApplicationException(
+                Exceptions.BadRequestException,
+                message=f"{self._collection} already exists.",
+                errors=[f"{self._collection}: {exists} already exists"],
             )
 
-    def get(self, **filters: Any) -> T | None:
-        with Session(bind=self._db.Engine) as session:
-            if found := session.query(self._model).filter_by(**filters).first():
-                return self._model.to_entity(found)
+        self._db.insert_one(entity)
+        return entity
 
-    def create(self, entity: T) -> T:
-        with Session(bind=self._db.Engine) as session:
-            try:
-                db_entity = self._model.from_entity(entity)
-                session.add(db_entity)
-                session.commit()
-                session.refresh(db_entity)
-
-                return self._model.to_entity(db_entity)
-
-            except SQLAlchemyError as e:
-                session.rollback()
-                raise e
-
-    def update(self, id: UUID, entity: T) -> bool:
-        with Session(bind=self._db.Engine) as session:
-            try:
-                db_entity = session.query(self._model).filter_by(id=id).first()
-                if not db_entity:
-                    return False
-
-                for key, value in entity.__dict__:
-                    setattr(db_entity, key, value)
-
-                session.commit()
-                return True
-            except SQLAlchemyError as e:
-                session.rollback()
-                raise e
+    def update(self, id: UUID, entity: TEntity) -> bool:
+        status = self._db.update_one({"id": id}, {"$set": entity})
+        return status.modified_count > 0
 
     def delete(self, id: UUID) -> bool:
-        with Session(bind=self._db.Engine) as session:
-            try:
-                db_entity = session.query(self._model).filter_by(id=id).first()
-                if not db_entity:
-                    return False
-
-                session.delete(db_entity)
-                session.commit()
-                return True
-
-            except SQLAlchemyError as e:
-                session.rollback()
-                raise e
+        status = self._db.delete_one({"id": id})
+        return status.deleted_count > 0
