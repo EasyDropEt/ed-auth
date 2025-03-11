@@ -5,9 +5,7 @@ from pika.adapters import BlockingConnection
 from pika.adapters.blocking_connection import BlockingChannel
 
 from src.application.contracts.infrastructure.message_queue.abc_subscriber import (
-    ABCSubscriber,
-    CallbackFunction,
-)
+    ABCSubscriber, CallbackFunction)
 from src.common.logging_helpers import get_logger
 from src.common.typing.config import TestMessage
 

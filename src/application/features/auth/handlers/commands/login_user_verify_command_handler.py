@@ -4,18 +4,14 @@ from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from src.application.common.responses.base_response import BaseResponse
-from src.application.contracts.infrastructure.persistence.abc_unit_of_work import (
-    ABCUnitOfWork,
-)
+from src.application.contracts.infrastructure.persistence.abc_unit_of_work import \
+    ABCUnitOfWork
 from src.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from src.application.features.auth.dtos import UserDto
-from src.application.features.auth.dtos.login_user_verify_dto import LoginUserVerifyDto
-from src.application.features.auth.dtos.validators.verify_otp_dto_validator import (
-    VerifyOtpDtoValidator,
-)
-from src.application.features.auth.requests.commands.login_user_verify_command import (
-    LoginUserVerifyCommand,
-)
+from src.application.features.auth.dtos.validators.verify_otp_dto_validator import \
+    VerifyOtpDtoValidator
+from src.application.features.auth.requests.commands.login_user_verify_command import \
+    LoginUserVerifyCommand
 from src.common.logging_helpers import get_logger
 
 LOG = get_logger()
@@ -33,7 +29,7 @@ class LoginUserVerifyCommandHandler(RequestHandler):
         if not dto_validator.is_valid:
             return BaseResponse[UserDto].error("Login failed.", dto_validator.errors)
 
-        dto: LoginUserVerifyDto = request.dto
+        dto = request.dto
         user = self._uow.user_repository.get(id=dto["user_id"])
         if not user:
             return BaseResponse[UserDto].error(
@@ -50,7 +46,7 @@ class LoginUserVerifyCommandHandler(RequestHandler):
                 ],
             )
 
-        if otp["value"] != dto["otp"] or otp["value"] != OtpVerificationAction.LOGIN:
+        if otp["value"] != dto["otp"] or otp["action"] != OtpVerificationAction.LOGIN:
             return BaseResponse[UserDto].error(
                 "Otp verification failed.",
                 ["Otp does not match with the one sent."],

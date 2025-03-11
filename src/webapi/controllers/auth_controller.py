@@ -2,21 +2,15 @@ from fastapi import APIRouter, Depends
 from rmediator.decorators.request_handler import Annotated
 from rmediator.mediator import Mediator
 
-from src.application.features.auth.dtos import (
-    CreateUserDto,
-    CreateUserVerifyDto,
-    LoginUserDto,
-    UserDto,
-    VerifyTokenDto,
-)
-from src.application.features.auth.dtos.login_user_verify_dto import LoginUserVerifyDto
+from src.application.features.auth.dtos import (CreateUserDto,
+                                                CreateUserVerifyDto,
+                                                LoginUserDto,
+                                                LoginUserVerifyDto,
+                                                UnverifiedUserDto, UserDto,
+                                                VerifyTokenDto)
 from src.application.features.auth.requests.commands import (
-    CreateUserCommand,
-    CreateUserVerifyCommand,
-    LoginUserCommand,
-    LoginUserVerifyCommand,
-    VerifyTokenCommand,
-)
+    CreateUserCommand, CreateUserVerifyCommand, LoginUserCommand,
+    LoginUserVerifyCommand, VerifyTokenCommand)
 from src.common.logging_helpers import get_logger
 from src.webapi.common.helpers import GenericResponse, rest_endpoint
 from src.webapi.dependency_setup import mediator
@@ -41,7 +35,7 @@ async def create_user_verify_otp(
     return await mediator.send(CreateUserVerifyCommand(dto=request))
 
 
-@ROUTER.post("/login/get-otp", response_model=GenericResponse[UserDto])
+@ROUTER.post("/login/get-otp", response_model=GenericResponse[UnverifiedUserDto])
 @rest_endpoint
 async def login_get_otp(
     request: LoginUserDto, mediator: Annotated[Mediator, Depends(mediator)]

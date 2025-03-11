@@ -2,9 +2,8 @@ from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from src.application.common.responses.base_response import BaseResponse
-from src.application.contracts.infrastructure.persistence.abc_unit_of_work import (
-    ABCUnitOfWork,
-)
+from src.application.contracts.infrastructure.persistence.abc_unit_of_work import \
+    ABCUnitOfWork
 from src.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from src.application.features.auth.dtos import UserDto
 from src.application.features.auth.requests.commands import VerifyTokenCommand
@@ -21,13 +20,12 @@ class VerifyTokenCommandHandler(RequestHandler):
 
     async def handle(self, request: VerifyTokenCommand) -> BaseResponse[UserDto]:
         payload = self._jwt.decode(request.dto["token"])
+        user = self._uow.user_repository.get(email=payload["email"])
 
         return BaseResponse[UserDto].success(
             "Token validated.",
             UserDto(
-                first_name=payload["first_name"],
-                last_name=payload["last_name"],
-                email=payload["email"],
+                **user,  # type: ignore
                 token=request.dto["token"],
             ),
         )

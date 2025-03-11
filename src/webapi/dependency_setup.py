@@ -3,37 +3,17 @@ from typing import Annotated
 from fastapi import Depends
 from rmediator.mediator import Mediator
 
-from src.application.contracts.infrastructure.persistence.abc_unit_of_work import (
-    ABCUnitOfWork,
-)
+from src.application.contracts.infrastructure.persistence.abc_unit_of_work import \
+    ABCUnitOfWork
 from src.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from src.application.contracts.infrastructure.utils.abc_otp import ABCOtp
 from src.application.features.auth.handlers.commands import (
-    LoginUserCommandHandler,
-    VerifyTokenCommandHandler,
-)
-from src.application.features.auth.handlers.commands.create_user_command_handler import (
-    CreateUserCommandHandler,
-)
-from src.application.features.auth.handlers.commands.create_user_verify_command_handler import (
-    CreateUserVerifyCommandHandler,
-)
-from src.application.features.auth.handlers.commands.login_user_verify_command_handler import (
-    LoginUserVerifyCommandHandler,
-)
+    CreateUserCommandHandler, CreateUserVerifyCommandHandler,
+    LoginUserCommandHandler, LoginUserVerifyCommandHandler,
+    VerifyTokenCommandHandler)
 from src.application.features.auth.requests.commands import (
-    LoginUserCommand,
-    VerifyTokenCommand,
-)
-from src.application.features.auth.requests.commands.create_user_command import (
-    CreateUserCommand,
-)
-from src.application.features.auth.requests.commands.create_user_verify_command import (
-    CreateUserVerifyCommand,
-)
-from src.application.features.auth.requests.commands.login_user_verify_command import (
-    LoginUserVerifyCommand,
-)
+    CreateUserCommand, CreateUserVerifyCommand, LoginUserCommand,
+    LoginUserVerifyCommand, VerifyTokenCommand)
 from src.common.generic_helpers import get_config
 from src.common.typing.config import Config
 from src.infrastructure.persistence.db_client import DbClient

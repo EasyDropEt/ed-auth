@@ -3,9 +3,8 @@ import json
 from pika.adapters import BlockingConnection
 from pika.connection import ConnectionParameters, URLParameters
 
-from src.application.contracts.infrastructure.message_queue.abc_producer import (
-    ABCProducer,
-)
+from src.application.contracts.infrastructure.message_queue.abc_producer import \
+    ABCProducer
 from src.common.logging_helpers import get_logger
 from src.common.typing.config import TestMessage
 
