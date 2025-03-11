@@ -1,9 +1,8 @@
 from typing import Any, Generic, TypeVar
 from uuid import UUID
 
-from src.application.contracts.infrastructure.persistence.abc_generic_repository import (
-    ABCGenericRepository,
-)
+from src.application.contracts.infrastructure.persistence.abc_generic_repository import \
+    ABCGenericRepository
 from src.common.exception_helpers import ApplicationException, Exceptions
 from src.infrastructure.persistence.db_client import DbClient
 from src.infrastructure.persistence.helpers import repository_class

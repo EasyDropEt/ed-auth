@@ -4,18 +4,16 @@ from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from src.application.common.responses.base_response import BaseResponse
-from src.application.contracts.infrastructure.persistence.abc_unit_of_work import (
-    ABCUnitOfWork,
-)
+from src.application.contracts.infrastructure.persistence.abc_unit_of_work import \
+    ABCUnitOfWork
 from src.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from src.application.features.auth.dtos import UserDto
-from src.application.features.auth.dtos.create_user_verify_dto import (
-    CreateUserVerifyDto,
-)
-from src.application.features.auth.dtos.validators.verify_otp_dto_validator import (
-    VerifyOtpDtoValidator,
-)
-from src.application.features.auth.requests.commands import CreateUserVerifyCommand
+from src.application.features.auth.dtos.create_user_verify_dto import \
+    CreateUserVerifyDto
+from src.application.features.auth.dtos.validators.verify_otp_dto_validator import \
+    VerifyOtpDtoValidator
+from src.application.features.auth.requests.commands import \
+    CreateUserVerifyCommand
 from src.common.logging_helpers import get_logger
 
 LOG = get_logger()

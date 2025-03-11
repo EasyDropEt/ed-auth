@@ -1,8 +1,6 @@
 from src.application.features.auth.dtos.login_user_dto import LoginUserDto
 from src.application.features.common.dto.abc_dto_validator import (
-    ABCDtoValidator,
-    ValidationResponse,
-)
+    ABCDtoValidator, ValidationResponse)
 
 
 class LoginUserDtoValidator(ABCDtoValidator[LoginUserDto]):

@@ -1,10 +1,7 @@
-from src.application.features.auth.dtos.create_user_verify_dto import (
-    CreateUserVerifyDto,
-)
+from src.application.features.auth.dtos.create_user_verify_dto import \
+    CreateUserVerifyDto
 from src.application.features.common.dto.abc_dto_validator import (
-    ABCDtoValidator,
-    ValidationResponse,
-)
+    ABCDtoValidator, ValidationResponse)
 
 
 class VerifyOtpDtoValidator(ABCDtoValidator[CreateUserVerifyDto]):

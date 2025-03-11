@@ -6,8 +6,8 @@ export_deps:
 
 format:
 	@echo "Make: Running formatters..."
-	@isort src
 	@black src
+	@isort src
 
 lint: format
 	@echo "Make: Running linters..."

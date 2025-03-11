@@ -1,11 +1,9 @@
 from abc import ABCMeta, abstractmethod
 
-from src.application.contracts.infrastructure.persistence.abc_otp_repository import (
-    ABCOtpRepository,
-)
-from src.application.contracts.infrastructure.persistence.abc_user_repository import (
-    ABCUserRepository,
-)
+from src.application.contracts.infrastructure.persistence.abc_otp_repository import \
+    ABCOtpRepository
+from src.application.contracts.infrastructure.persistence.abc_user_repository import \
+    ABCUserRepository
 
 
 class ABCUnitOfWork(metaclass=ABCMeta):

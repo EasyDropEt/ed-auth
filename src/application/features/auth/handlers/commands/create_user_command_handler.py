@@ -5,12 +5,12 @@ from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from src.application.common.responses.base_response import BaseResponse
-from src.application.contracts.infrastructure.persistence.abc_unit_of_work import (
-    ABCUnitOfWork,
-)
+from src.application.contracts.infrastructure.persistence.abc_unit_of_work import \
+    ABCUnitOfWork
 from src.application.contracts.infrastructure.utils.abc_otp import ABCOtp
 from src.application.features.auth.dtos import CreateUserDto, UnverifiedUserDto
-from src.application.features.auth.dtos.validators import CreateUserDtoValidator
+from src.application.features.auth.dtos.validators import \
+    CreateUserDtoValidator
 from src.application.features.auth.requests.commands import CreateUserCommand
 from src.common.generic_helpers import get_new_id
 from src.common.logging_helpers import get_logger

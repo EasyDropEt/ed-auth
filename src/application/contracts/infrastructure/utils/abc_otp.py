@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Annotated
 
-OtpCode = Annotated[str, "A 4 number code"]
+OtpCode = Annotated[str, "A four number code"]
 
 
 class ABCOtp(metaclass=ABCMeta):
