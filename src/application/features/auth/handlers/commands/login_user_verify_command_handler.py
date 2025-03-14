@@ -38,7 +38,7 @@ class LoginUserVerifyCommandHandler(RequestHandler):
             )
 
         otp = self._uow.otp_repository.get(user_id=dto["user_id"])
-        if not otp:
+        if not otp or otp["action"] != OtpVerificationAction.LOGIN:
             return BaseResponse[UserDto].error(
                 "Otp verification failed.",
                 [
@@ -46,7 +46,7 @@ class LoginUserVerifyCommandHandler(RequestHandler):
                 ],
             )
 
-        if otp["value"] != dto["otp"] or otp["action"] != OtpVerificationAction.LOGIN:
+        if otp["value"] != dto["otp"]:
             return BaseResponse[UserDto].error(
                 "Otp verification failed.",
                 ["Otp does not match with the one sent."],
