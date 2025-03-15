@@ -9,11 +9,11 @@ from src.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from src.application.contracts.infrastructure.utils.abc_otp import ABCOtp
 from src.application.features.auth.handlers.commands import (
     CreateUserCommandHandler, CreateUserVerifyCommandHandler,
-    LoginUserCommandHandler, LoginUserVerifyCommandHandler,
-    VerifyTokenCommandHandler)
+    DeleteUserCommandHandler, LoginUserCommandHandler,
+    LoginUserVerifyCommandHandler, VerifyTokenCommandHandler)
 from src.application.features.auth.requests.commands import (
-    CreateUserCommand, CreateUserVerifyCommand, LoginUserCommand,
-    LoginUserVerifyCommand, VerifyTokenCommand)
+    CreateUserCommand, CreateUserVerifyCommand, DeleteUserCommand,
+    LoginUserCommand, LoginUserVerifyCommand, VerifyTokenCommand)
 from src.common.generic_helpers import get_config
 from src.common.typing.config import Config
 from src.infrastructure.persistence.db_client import DbClient
@@ -47,6 +47,7 @@ def mediator(
 
     auth_handlers = [
         (CreateUserCommand, CreateUserCommandHandler(uow, otp)),
+        (DeleteUserCommand, DeleteUserCommandHandler(uow)),
         (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
         (LoginUserCommand, LoginUserCommandHandler(uow, otp)),
         (LoginUserVerifyCommand, LoginUserVerifyCommandHandler(uow, jwt)),
