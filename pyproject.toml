@@ -29,6 +29,9 @@ isort = "^5.13.2"
 black = "^24.10.0"
 ruff = "^0.8.2"
 
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
