@@ -1186,13 +1186,13 @@ typing-extensions = ">=4.12.2"
 
 [[package]]
 name = "rmediator"
-version = "0.2.5"
+version = "0.2.7"
 description = "Request Mediator PyPI (Python Package Index) Package"
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "rmediator-0.2.5-py3-none-any.whl", hash = "sha256:92de80cdbb842cb4f6e014944f05bee680f62a6dcfe1b5d63fbbd3d4e2430691"},
+    {file = "rmediator-0.2.7-py3-none-any.whl", hash = "sha256:82bee056bd6f481a9923323b71a0327a8cd36f78d7deb6bc43be297115db56b4"},
 ]
 
 [package.extras]
