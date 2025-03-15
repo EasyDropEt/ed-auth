@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "py"
+name = "ed-auth"
 version = "0.1.0"
 description = ""
 authors = ["ffekirnew <ffekirnew0808@gmail.com>"]

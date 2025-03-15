@@ -42,7 +42,7 @@ class CreateUserVerifyCommandHandler(RequestHandler):
             )
 
         otp = self._uow.otp_repository.get(user_id=dto["user_id"])
-        if not otp or otp["value"] != OtpVerificationAction.VERIFY_EMAIL:
+        if not otp or otp["action"] != OtpVerificationAction.VERIFY_EMAIL:
             return BaseResponse[UserDto].error(
                 "Otp verification failed.",
                 [

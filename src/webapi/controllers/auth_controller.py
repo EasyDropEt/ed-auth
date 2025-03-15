@@ -19,7 +19,7 @@ ROUTER = APIRouter(prefix="/auth", tags=["Auth"])
 LOG = get_logger()
 
 
-@ROUTER.post("/create/get-otp", response_model=GenericResponse[UserDto])
+@ROUTER.post("/create/get-otp", response_model=GenericResponse[UnverifiedUserDto])
 @rest_endpoint
 async def create_user_get_otp(
     request: CreateUserDto, mediator: Annotated[Mediator, Depends(mediator)]
@@ -51,7 +51,7 @@ async def login_verify_otp(
     return await mediator.send(LoginUserVerifyCommand(dto=request))
 
 
-@ROUTER.post("/token", response_model=GenericResponse[UserDto])
+@ROUTER.post("/token/verify", response_model=GenericResponse[UserDto])
 @rest_endpoint
 async def token(
     request: VerifyTokenDto, mediator: Annotated[Mediator, Depends(mediator)]
