@@ -14,6 +14,7 @@ from src.application.features.auth.dtos.validators.login_user_dto_validator impo
     LoginUserDtoValidator
 from src.application.features.auth.requests.commands.login_user_command import \
     LoginUserCommand
+from src.common.exception_helpers import ApplicationException, Exceptions
 from src.common.generic_helpers import get_new_id
 from src.common.logging_helpers import get_logger
 
@@ -32,7 +33,8 @@ class LoginUserCommandHandler(RequestHandler):
         dto_validator = LoginUserDtoValidator().validate(request.dto)
 
         if not dto_validator.is_valid:
-            return BaseResponse[UnverifiedUserDto].error(
+            raise ApplicationException(
+                Exceptions.ValidationException,
                 "Login failed.",
                 dto_validator.errors,
             )
@@ -47,7 +49,8 @@ class LoginUserCommandHandler(RequestHandler):
         )
 
         if not user:
-            return BaseResponse[UnverifiedUserDto].error(
+            raise ApplicationException(
+                Exceptions.NotFoundException,
                 "Login failed.",
                 ["No user found with the given credentials."],
             )

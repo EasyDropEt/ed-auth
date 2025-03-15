@@ -12,6 +12,7 @@ from src.application.features.auth.dtos import CreateUserDto, UnverifiedUserDto
 from src.application.features.auth.dtos.validators import \
     CreateUserDtoValidator
 from src.application.features.auth.requests.commands import CreateUserCommand
+from src.common.exception_helpers import ApplicationException, Exceptions
 from src.common.generic_helpers import get_new_id
 from src.common.logging_helpers import get_logger
 
@@ -30,8 +31,10 @@ class CreateUserCommandHandler(RequestHandler):
         dto_validator = CreateUserDtoValidator().validate(request.dto)
 
         if not dto_validator.is_valid:
-            return BaseResponse[UnverifiedUserDto].error(
-                "Creating account failed.", dto_validator.errors
+            raise ApplicationException(
+                Exceptions.ValidationException,
+                "Creating account failed.",
+                dto_validator.errors,
             )
 
         dto: CreateUserDto = request.dto
