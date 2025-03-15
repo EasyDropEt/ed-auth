@@ -28,7 +28,7 @@ class GenericResponse(_ApiResponse, Generic[T]):
 
     def to_dict(self) -> dict:
         return {
-            "success": self.is_success,
+            "is_success": self.is_success,
             "message": self.message,
             "data": self.data,
             "errors": self.errors,
