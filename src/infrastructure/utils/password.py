@@ -1,5 +1,3 @@
-import jwt
-from ed_domain_model.tokens.auth_payload import AuthPayload
 from passlib.context import CryptContext
 
 from src.application.contracts.infrastructure.utils.abc_password import \

@@ -8,6 +8,8 @@ from src.application.common.responses.base_response import BaseResponse
 from src.application.contracts.infrastructure.persistence.abc_unit_of_work import \
     ABCUnitOfWork
 from src.application.contracts.infrastructure.utils.abc_otp import ABCOtp
+from src.application.contracts.infrastructure.utils.abc_password import \
+    ABCPassword
 from src.application.features.auth.dtos.unverified_user_dto import \
     UnverifiedUserDto
 from src.application.features.auth.dtos.validators.login_user_dto_validator import \
@@ -23,9 +25,10 @@ LOG = get_logger()
 
 @request_handler(LoginUserCommand, BaseResponse[UnverifiedUserDto])
 class LoginUserCommandHandler(RequestHandler):
-    def __init__(self, uow: ABCUnitOfWork, otp: ABCOtp):
+    def __init__(self, uow: ABCUnitOfWork, otp: ABCOtp, password: ABCPassword):
         self._uow = uow
         self._otp = otp
+        self._password = password
 
     async def handle(
         self, request: LoginUserCommand
@@ -54,6 +57,21 @@ class LoginUserCommandHandler(RequestHandler):
                 "Login failed.",
                 ["No user found with the given credentials."],
             )
+
+        if user["password"]:
+            if "password" not in request.dto:
+                raise ApplicationException(
+                    Exceptions.BadRequestException,
+                    "Login failed.",
+                    ["Password is required."],
+                )
+
+            if not self._password.verify(request.dto["password"], user["password"]):
+                raise ApplicationException(
+                    Exceptions.BadRequestException,
+                    "Login failed.",
+                    ["Password is incorrect."],
+                )
 
         self._uow.otp_repository.create(
             {

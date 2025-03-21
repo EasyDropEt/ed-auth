@@ -8,6 +8,8 @@ from src.application.common.responses.base_response import BaseResponse
 from src.application.contracts.infrastructure.persistence.abc_unit_of_work import \
     ABCUnitOfWork
 from src.application.contracts.infrastructure.utils.abc_otp import ABCOtp
+from src.application.contracts.infrastructure.utils.abc_password import \
+    ABCPassword
 from src.application.features.auth.dtos import CreateUserDto, UnverifiedUserDto
 from src.application.features.auth.dtos.validators import \
     CreateUserDtoValidator
@@ -21,9 +23,10 @@ LOG = get_logger()
 
 @request_handler(CreateUserCommand, BaseResponse[UnverifiedUserDto])
 class CreateUserCommandHandler(RequestHandler):
-    def __init__(self, uow: ABCUnitOfWork, otp: ABCOtp):
+    def __init__(self, uow: ABCUnitOfWork, otp: ABCOtp, password: ABCPassword):
         self._uow = uow
         self._otp = otp
+        self._password = password
 
     async def handle(
         self, request: CreateUserCommand
@@ -37,7 +40,7 @@ class CreateUserCommandHandler(RequestHandler):
                 dto_validator.errors,
             )
 
-        dto: CreateUserDto = request.dto
+        dto = request.dto
         user = self._uow.user_repository.create(
             {
                 "id": get_new_id(),
@@ -45,7 +48,7 @@ class CreateUserCommandHandler(RequestHandler):
                 "last_name": dto["last_name"],
                 "email": dto.get("email", ""),
                 "phone_number": dto.get("phone_number", ""),
-                "password": dto["password"],
+                "password": self._password.hash(dto["password"]),
                 "verified": False,
                 "create_datetime": datetime.now(UTC),
                 "update_datetime": datetime.now(UTC),
