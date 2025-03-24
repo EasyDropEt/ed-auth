@@ -17,6 +17,7 @@ psycopg2 = "^2.9.10"
 ed-domain-model = "^0.0.13"
 pyjwt = "^2.10.1"
 pymongo = "^4.10.1"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 
 [tool.poetry.group.test.dependencies]

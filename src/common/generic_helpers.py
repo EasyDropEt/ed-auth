@@ -20,4 +20,5 @@ def get_config() -> Config:
         "rabbitmq_queue": os.getenv("RABBITMQ_QUEUE") or "",
         "jwt_secret": os.getenv("JWT_SECRET") or "",
         "jwt_algorithm": os.getenv("JWT_ALGORITHM") or "",
+        "password_scheme": os.getenv("PASSWORD_SCHEME") or "",
     }

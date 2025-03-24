@@ -8,6 +8,7 @@ class Config(TypedDict):
     rabbitmq_queue: str
     jwt_secret: str
     jwt_algorithm: str
+    password_scheme: str
 
 
 class TestMessage(TypedDict):

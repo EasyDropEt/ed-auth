@@ -7,6 +7,8 @@ from src.application.contracts.infrastructure.persistence.abc_unit_of_work impor
     ABCUnitOfWork
 from src.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from src.application.contracts.infrastructure.utils.abc_otp import ABCOtp
+from src.application.contracts.infrastructure.utils.abc_password import \
+    ABCPassword
 from src.application.features.auth.handlers.commands import (
     CreateUserCommandHandler, CreateUserVerifyCommandHandler,
     DeleteUserCommandHandler, LoginUserCommandHandler,
@@ -20,6 +22,7 @@ from src.infrastructure.persistence.db_client import DbClient
 from src.infrastructure.persistence.unit_of_work import UnitOfWork
 from src.infrastructure.utils.jwt import Jwt
 from src.infrastructure.utils.otp import Otp
+from src.infrastructure.utils.password import Password
 
 
 def get_uow(config: Annotated[Config, Depends(get_config)]) -> ABCUnitOfWork:
@@ -38,18 +41,23 @@ def get_otp() -> ABCOtp:
     return Otp()
 
 
+def get_password(config: Annotated[Config, Depends(get_config)]) -> ABCPassword:
+    return Password(config["password_scheme"])
+
+
 def mediator(
     uow: Annotated[ABCUnitOfWork, Depends(get_uow)],
     jwt: Annotated[ABCJwt, Depends(get_jwt)],
     otp: Annotated[ABCOtp, Depends(get_otp)],
+    password: Annotated[ABCPassword, Depends(get_password)],
 ) -> Mediator:
     mediator = Mediator()
 
     auth_handlers = [
-        (CreateUserCommand, CreateUserCommandHandler(uow, otp)),
+        (CreateUserCommand, CreateUserCommandHandler(uow, otp, password)),
         (DeleteUserCommand, DeleteUserCommandHandler(uow)),
         (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
-        (LoginUserCommand, LoginUserCommandHandler(uow, otp)),
+        (LoginUserCommand, LoginUserCommandHandler(uow, otp, password)),
         (LoginUserVerifyCommand, LoginUserVerifyCommandHandler(uow, jwt)),
         (VerifyTokenCommand, VerifyTokenCommandHandler(uow, jwt)),
     ]
