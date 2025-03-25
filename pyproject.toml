@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ed-auth"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["ffekirnew <ffekirnew0808@gmail.com>"]
 license = "MIT"
@@ -14,10 +14,12 @@ websockets = "^14.1"
 rmediator = "^0.2.3"
 sqlalchemy = "^2.0.36"
 psycopg2 = "^2.9.10"
-ed-domain-model = "^0.0.13"
 pyjwt = "^2.10.1"
 pymongo = "^4.10.1"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+pytest-asyncio = "^0.25.3"
+twine = "^6.1.0"
+ed-domain = "^0.1.14"
 
 
 [tool.poetry.group.test.dependencies]
@@ -34,5 +36,5 @@ ruff = "^0.8.2"
 poetry-plugin-export = ">=1.8"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=46.4.0", "wheel"]
+build-backend = "setuptools.build_meta"
