@@ -13,7 +13,8 @@ LOG = get_logger()
 
 class API(metaclass=SingletonMeta):
     def __init__(self) -> None:
-        self._app = FastAPI(title='Auth Service', description='Auth Service API')
+        self._app = FastAPI(title="Auth Service",
+                            description="Auth Service API")
 
     @property
     def app(self):

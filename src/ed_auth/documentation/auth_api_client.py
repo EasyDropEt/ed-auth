@@ -9,8 +9,8 @@ from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     UnverifiedUserDto, UserDto,
                                                     VerifyTokenDto)
 from ed_auth.common.api_helpers import ApiClient
+from ed_auth.documentation.abc_auth_api_client import ABCAuthApiClient
 from ed_auth.documentation.endpoints import AuthEndpoint
-from src.ed_auth.documentation.abc_auth_api_client import ABCAuthApiClient
 
 
 class AuthApiClient(ABCAuthApiClient):
