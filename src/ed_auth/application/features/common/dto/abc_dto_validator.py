@@ -21,5 +21,4 @@ TDto = TypeVar("TDto")
 
 class ABCDtoValidator(Generic[TDto], metaclass=ABCMeta):
     @abstractmethod
-    def validate(self, dto: TDto) -> ValidationResponse:
-        pass
+    def validate(self, dto: TDto) -> ValidationResponse: ...

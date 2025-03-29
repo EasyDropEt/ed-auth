@@ -1,9 +1,9 @@
 from datetime import UTC, datetime
 
+from ed_domain.entities.otp import OtpVerificationAction
 from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
-from ed_domain.entities.otp import OtpVerificationAction
 from ed_auth.application.common.responses.base_response import BaseResponse
 from ed_auth.application.contracts.infrastructure.persistence.abc_unit_of_work import \
     ABCUnitOfWork
@@ -28,20 +28,25 @@ class CreateUserCommandHandler(RequestHandler):
         self._uow = uow
         self._otp = otp
         self._password = password
+        self._dto_validator = CreateUserDtoValidator()
 
     async def handle(
         self, request: CreateUserCommand
     ) -> BaseResponse[UnverifiedUserDto]:
-        dto_validator = CreateUserDtoValidator().validate(request.dto)
+        validation_response = self._dto_validator.validate(request.dto)
 
-        if not dto_validator.is_valid:
+        print(self._dto_validator)
+        if not validation_response.is_valid:
             raise ApplicationException(
                 Exceptions.ValidationException,
                 "Creating account failed.",
-                dto_validator.errors,
+                validation_response.errors,
             )
 
         dto = request.dto
+        hashed_password = (
+            self._password.hash(dto["password"]) if "password" in dto else ""
+        )
         user = self._uow.user_repository.create(
             {
                 "id": get_new_id(),
@@ -49,7 +54,7 @@ class CreateUserCommandHandler(RequestHandler):
                 "last_name": dto["last_name"],
                 "email": dto.get("email", ""),
                 "phone_number": dto.get("phone_number", ""),
-                "password": self._password.hash(dto["password"]),
+                "password": hashed_password,
                 "verified": False,
                 "create_datetime": datetime.now(UTC),
                 "update_datetime": datetime.now(UTC),
