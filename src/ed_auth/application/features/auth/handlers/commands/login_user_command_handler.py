@@ -29,11 +29,12 @@ class LoginUserCommandHandler(RequestHandler):
         self._uow = uow
         self._otp = otp
         self._password = password
+        self._dto_validator = LoginUserDtoValidator()
 
     async def handle(
         self, request: LoginUserCommand
     ) -> BaseResponse[UnverifiedUserDto]:
-        dto_validator = LoginUserDtoValidator().validate(request.dto)
+        dto_validator = self._dto_validator.validate(request.dto)
 
         if not dto_validator.is_valid:
             raise ApplicationException(

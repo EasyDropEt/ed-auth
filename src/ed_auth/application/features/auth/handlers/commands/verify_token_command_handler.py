@@ -6,7 +6,9 @@ from ed_auth.application.contracts.infrastructure.persistence.abc_unit_of_work i
     ABCUnitOfWork
 from ed_auth.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from ed_auth.application.features.auth.dtos import UserDto
-from ed_auth.application.features.auth.requests.commands import VerifyTokenCommand
+from ed_auth.application.features.auth.requests.commands import \
+    VerifyTokenCommand
+from ed_auth.common.exception_helpers import ApplicationException, Exceptions
 from ed_auth.common.logging_helpers import get_logger
 
 LOG = get_logger()
@@ -20,12 +22,26 @@ class VerifyTokenCommandHandler(RequestHandler):
 
     async def handle(self, request: VerifyTokenCommand) -> BaseResponse[UserDto]:
         payload = self._jwt.decode(request.dto["token"])
-        user = self._uow.user_repository.get(email=payload["email"])
 
-        return BaseResponse[UserDto].success(
-            "Token validated.",
-            UserDto(
-                **user,  # type: ignore
-                token=request.dto["token"],
-            ),
+        print("payload", payload)
+        if "email" not in payload:
+            raise ApplicationException(
+                Exceptions.UnauthorizedException,
+                "Token validation failed.",
+                ["Token is malformed."],
+            )
+
+        if user := self._uow.user_repository.get(email=payload["email"]):
+            return BaseResponse[UserDto].success(
+                "Token validated.",
+                UserDto(
+                    **user,  # type: ignore
+                    token=request.dto["token"],
+                ),
+            )
+
+        raise ApplicationException(
+            Exceptions.UnauthorizedException,
+            "Token validation failed.",
+            ["User not found."],
         )

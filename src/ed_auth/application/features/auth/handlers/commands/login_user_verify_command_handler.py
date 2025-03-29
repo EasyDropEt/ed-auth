@@ -8,9 +8,9 @@ from ed_auth.application.contracts.infrastructure.persistence.abc_unit_of_work i
     ABCUnitOfWork
 from ed_auth.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from ed_auth.application.features.auth.dtos import UserDto
-from ed_auth.application.features.auth.dtos.validators.verify_otp_dto_validator import \
-    VerifyOtpDtoValidator
-from ed_auth.application.features.auth.requests.commands.login_user_verify_command import \
+from ed_auth.application.features.auth.dtos.validators import \
+    LoginUserVerifyDtoValidator
+from ed_auth.application.features.auth.requests.commands import \
     LoginUserVerifyCommand
 from ed_auth.common.exception_helpers import ApplicationException, Exceptions
 from ed_auth.common.logging_helpers import get_logger
@@ -23,9 +23,10 @@ class LoginUserVerifyCommandHandler(RequestHandler):
     def __init__(self, uow: ABCUnitOfWork, jwt: ABCJwt):
         self._uow = uow
         self._jwt = jwt
+        self._dto_validator = LoginUserVerifyDtoValidator()
 
     async def handle(self, request: LoginUserVerifyCommand) -> BaseResponse[UserDto]:
-        dto_validator = VerifyOtpDtoValidator().validate(request.dto)
+        dto_validator = self._dto_validator.validate(request.dto)
 
         if not dto_validator.is_valid:
             raise ApplicationException(
@@ -39,7 +40,7 @@ class LoginUserVerifyCommandHandler(RequestHandler):
         if not user:
             raise ApplicationException(
                 Exceptions.NotFoundException,
-                "Otp verification failed.",
+                "Login failed..",
                 [f"User with that id = {dto['user_id']} does not exist."],
             )
 
@@ -47,7 +48,7 @@ class LoginUserVerifyCommandHandler(RequestHandler):
         if not otp or otp["action"] != OtpVerificationAction.LOGIN:
             raise ApplicationException(
                 Exceptions.BadRequestException,
-                "Otp verification failed.",
+                "Login failed.",
                 [
                     f"Otp has not been sent to the user with id = {dto['user_id']} recently."
                 ],
@@ -56,7 +57,7 @@ class LoginUserVerifyCommandHandler(RequestHandler):
         if otp["value"] != dto["otp"]:
             raise ApplicationException(
                 Exceptions.BadRequestException,
-                "Otp verification failed.",
+                "Login failed.",
                 ["Otp does not match with the one sent."],
             )
 

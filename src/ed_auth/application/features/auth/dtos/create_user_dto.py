@@ -6,4 +6,4 @@ class CreateUserDto(TypedDict):
     last_name: str
     email: NotRequired[str]
     phone_number: NotRequired[str]
-    password: str
+    password: NotRequired[str]

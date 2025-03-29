@@ -8,10 +8,8 @@ from ed_auth.application.contracts.infrastructure.persistence.abc_unit_of_work i
     ABCUnitOfWork
 from ed_auth.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from ed_auth.application.features.auth.dtos import UserDto
-from ed_auth.application.features.auth.dtos.create_user_verify_dto import \
-    CreateUserVerifyDto
-from ed_auth.application.features.auth.dtos.validators.verify_otp_dto_validator import \
-    VerifyOtpDtoValidator
+from ed_auth.application.features.auth.dtos.validators.create_user_verify_dto_validator import \
+    CreateUserVerifyDtoValidator
 from ed_auth.application.features.auth.requests.commands import \
     CreateUserVerifyCommand
 from ed_auth.common.exception_helpers import ApplicationException, Exceptions
@@ -25,9 +23,10 @@ class CreateUserVerifyCommandHandler(RequestHandler):
     def __init__(self, uow: ABCUnitOfWork, jwt: ABCJwt):
         self._uow = uow
         self._jwt = jwt
+        self._dto_validator = CreateUserVerifyDtoValidator()
 
     async def handle(self, request: CreateUserVerifyCommand) -> BaseResponse[UserDto]:
-        dto_validator = VerifyOtpDtoValidator().validate(request.dto)
+        dto_validator = self._dto_validator.validate(request.dto)
 
         if not dto_validator.is_valid:
             raise ApplicationException(
@@ -36,7 +35,7 @@ class CreateUserVerifyCommandHandler(RequestHandler):
                 dto_validator.errors,
             )
 
-        dto: CreateUserVerifyDto = request.dto
+        dto = request.dto
         user = self._uow.user_repository.get(id=dto["user_id"])
         if not user:
             raise ApplicationException(
@@ -62,18 +61,16 @@ class CreateUserVerifyCommandHandler(RequestHandler):
                 ["Otp does not match with the one sent."],
             )
 
+        token = self._jwt.encode(
+            {
+                "first_name": user["first_name"],
+                "last_name": user["last_name"],
+                "email": user.get("email", ""),
+                "phone_number": user.get("phone_number", ""),
+                "user_type": UserType.DRIVER,
+            }
+        )
         return BaseResponse[UserDto].success(
             "Create successful.",
-            UserDto(
-                **user,  # type: ignore
-                token=self._jwt.encode(
-                    {
-                        "first_name": user["first_name"],
-                        "last_name": user["last_name"],
-                        "email": user.get("email", ""),
-                        "phone_number": user.get("phone_number", ""),
-                        "user_type": UserType.DRIVER,
-                    }
-                ),
-            ),
+            UserDto(**user, token=token),  # type: ignore
         )
