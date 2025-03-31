@@ -1,4 +1,4 @@
-from ed_auth.common.logging_helpers import get_logger
+from ed_domain.common.logging import get_logger
 from ed_auth.webapi.api import API
 
 LOG = get_logger()

@@ -2,7 +2,7 @@ import pytest
 
 from ed_auth.application.features.auth.handlers.commands.create_user_command_handler import \
     CreateUserCommandHandler
-from ed_auth.common.exception_helpers import ApplicationException
+from ed_domain.common.exceptions import ApplicationException
 from tests.helpers.fixture_generator import generate_fixtures
 
 PATH = "ed_auth.application.features.auth.handlers.commands.create_user_command_handler"
