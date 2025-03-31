@@ -1,19 +1,18 @@
-from ed_domain.entities.otp import OtpVerificationAction
+from ed_domain.common.exceptions import ApplicationException, Exceptions
+from ed_domain.common.logging import get_logger
+from ed_domain.core.entities.otp import OtpVerificationAction
+from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
 from ed_domain.tokens.auth_payload import AuthPayload, UserType
 from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from ed_auth.application.common.responses.base_response import BaseResponse
-from ed_auth.application.contracts.infrastructure.persistence.abc_unit_of_work import \
-    ABCUnitOfWork
 from ed_auth.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from ed_auth.application.features.auth.dtos import UserDto
 from ed_auth.application.features.auth.dtos.validators import \
     LoginUserVerifyDtoValidator
 from ed_auth.application.features.auth.requests.commands import \
     LoginUserVerifyCommand
-from ed_auth.common.exception_helpers import ApplicationException, Exceptions
-from ed_auth.common.logging_helpers import get_logger
 
 LOG = get_logger()
 
@@ -61,13 +60,13 @@ class LoginUserVerifyCommandHandler(RequestHandler):
                 ["Otp does not match with the one sent."],
             )
 
-        payload: AuthPayload = {
-            "first_name": user["first_name"],
-            "last_name": user["last_name"],
-            "email": user.get("email", ""),
-            "phone_number": user.get("phone_number", ""),
-            "user_type": UserType.DRIVER,
-        }
+        payload = AuthPayload(
+            first_name=user["first_name"],
+            last_name=user["last_name"],
+            email=user.get("email", ""),
+            phone_number=user.get("phone_number", ""),
+            user_type=UserType.DRIVER,
+        )
 
         return BaseResponse[UserDto].success(
             "Login successful.",

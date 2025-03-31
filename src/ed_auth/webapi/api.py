@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
 
-from ed_auth.common.exception_helpers import ApplicationException
-from ed_auth.common.logging_helpers import get_logger
+from ed_domain.common.exceptions import ApplicationException
+from ed_domain.common.logging import get_logger
 from ed_auth.common.singleton_helpers import SingletonMeta
 from ed_auth.webapi.common.helpers import GenericResponse
 from ed_auth.webapi.controllers import auth_controller, user_controller

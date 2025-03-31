@@ -1,12 +1,14 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
-from ed_domain.entities.otp import OtpVerificationAction
+from ed_domain.common.exceptions import ApplicationException, Exceptions
+from ed_domain.common.logging import get_logger
+from ed_domain.core.entities import Otp
+from ed_domain.core.entities.otp import OtpVerificationAction
+from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
 from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from ed_auth.application.common.responses.base_response import BaseResponse
-from ed_auth.application.contracts.infrastructure.persistence.abc_unit_of_work import \
-    ABCUnitOfWork
 from ed_auth.application.contracts.infrastructure.utils.abc_otp import ABCOtp
 from ed_auth.application.contracts.infrastructure.utils.abc_password import \
     ABCPassword
@@ -16,9 +18,7 @@ from ed_auth.application.features.auth.dtos.validators.login_user_dto_validator 
     LoginUserDtoValidator
 from ed_auth.application.features.auth.requests.commands.login_user_command import \
     LoginUserCommand
-from ed_auth.common.exception_helpers import ApplicationException, Exceptions
 from ed_auth.common.generic_helpers import get_new_id
-from ed_auth.common.logging_helpers import get_logger
 
 LOG = get_logger()
 
@@ -75,14 +75,16 @@ class LoginUserCommandHandler(RequestHandler):
                 )
 
         self._uow.otp_repository.create(
-            {
-                "id": get_new_id(),
-                "user_id": user["id"],
-                "action": OtpVerificationAction.LOGIN,
-                "create_datetime": datetime.now(UTC),
-                "expiry_datetime": datetime.now(UTC),
-                "value": self._otp.generate(),
-            }
+            Otp(
+                id=get_new_id(),
+                user_id=user["id"],
+                action=OtpVerificationAction.LOGIN,
+                create_datetime=datetime.now(UTC),
+                update_datetime=datetime.now(UTC),
+                expiry_datetime=datetime.now(UTC) + timedelta(minutes=2),
+                value=self._otp.generate(),
+                deleted=False,
+            )
         )
 
         return BaseResponse[UnverifiedUserDto].success(

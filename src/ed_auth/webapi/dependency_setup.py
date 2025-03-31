@@ -1,10 +1,11 @@
 from typing import Annotated
 
+from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
+from ed_utility.persistence.mongo_db.db_client import DbClient
+from ed_utility.persistence.mongo_db.unit_of_work import UnitOfWork
 from fastapi import Depends
 from rmediator.mediator import Mediator
 
-from ed_auth.application.contracts.infrastructure.persistence.abc_unit_of_work import \
-    ABCUnitOfWork
 from ed_auth.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from ed_auth.application.contracts.infrastructure.utils.abc_otp import ABCOtp
 from ed_auth.application.contracts.infrastructure.utils.abc_password import \
@@ -18,8 +19,6 @@ from ed_auth.application.features.auth.requests.commands import (
     LoginUserCommand, LoginUserVerifyCommand, VerifyTokenCommand)
 from ed_auth.common.generic_helpers import get_config
 from ed_auth.common.typing.config import Config
-from ed_auth.infrastructure.persistence.db_client import DbClient
-from ed_auth.infrastructure.persistence.unit_of_work import UnitOfWork
 from ed_auth.infrastructure.utils.jwt import Jwt
 from ed_auth.infrastructure.utils.otp import Otp
 from ed_auth.infrastructure.utils.password import Password

@@ -4,7 +4,7 @@ from ed_domain.tokens.auth_payload import UserType
 
 from ed_auth.application.features.auth.handlers.commands.create_user_verify_command_handler import \
     CreateUserVerifyCommandHandler
-from ed_auth.common.exception_helpers import ApplicationException
+from ed_domain.common.exceptions import ApplicationException
 from tests.helpers.fixture_generator import generate_fixtures
 
 PATH = "ed_auth.application.features.auth.handlers.commands.create_user_verify_command_handler"

@@ -11,7 +11,7 @@ from ed_auth.application.features.auth.dtos import (CreateUserDto,
 from ed_auth.application.features.auth.requests.commands import (
     CreateUserCommand, CreateUserVerifyCommand, LoginUserCommand,
     LoginUserVerifyCommand, VerifyTokenCommand)
-from ed_auth.common.logging_helpers import get_logger
+from ed_domain.common.logging import get_logger
 from ed_auth.webapi.common.helpers import GenericResponse, rest_endpoint
 from ed_auth.webapi.dependency_setup import mediator
 

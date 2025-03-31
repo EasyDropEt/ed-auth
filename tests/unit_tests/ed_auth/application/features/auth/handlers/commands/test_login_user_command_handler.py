@@ -4,7 +4,7 @@ import pytest
 
 from ed_auth.application.features.auth.handlers.commands.login_user_command_handler import \
     LoginUserCommandHandler
-from ed_auth.common.exception_helpers import ApplicationException
+from ed_domain.common.exceptions import ApplicationException
 from tests.helpers.fixture_generator import generate_fixtures
 
 PATH = "ed_auth.application.features.auth.handlers.commands.login_user_command_handler"

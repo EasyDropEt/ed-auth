@@ -6,7 +6,7 @@ from ed_auth.application.common.responses.base_response import BaseResponse
 from ed_auth.application.features.auth.dtos import UserDto
 from ed_auth.application.features.auth.handlers.commands.verify_token_command_handler import \
     VerifyTokenCommandHandler
-from ed_auth.common.exception_helpers import ApplicationException
+from ed_domain.common.exceptions import ApplicationException
 from tests.helpers.fixture_generator import generate_fixtures
 
 PATH = (
