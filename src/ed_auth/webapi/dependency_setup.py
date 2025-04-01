@@ -1,8 +1,8 @@
 from typing import Annotated
 
 from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
-from ed_utility.persistence.mongo_db.db_client import DbClient
-from ed_utility.persistence.mongo_db.unit_of_work import UnitOfWork
+from ed_infrastructure.persistence.mongo_db.db_client import DbClient
+from ed_infrastructure.persistence.mongo_db.unit_of_work import UnitOfWork
 from fastapi import Depends
 from rmediator.mediator import Mediator
 
