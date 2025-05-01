@@ -23,6 +23,13 @@ def test_valid_phone_number_with_country_code(phone_number_validator):
     assert response.errors == []
 
 
+def test_valid_phone_number_with_country_code_without_plus(phone_number_validator):
+    dto = PhoneNumber(value="251912345678")
+    response = phone_number_validator.validate(dto)
+    assert response.is_valid is True
+    assert response.errors == []
+
+
 def test_valid_phone_number_without_country_code(phone_number_validator):
     dto = PhoneNumber(value="0912345678")
     response = phone_number_validator.validate(dto)

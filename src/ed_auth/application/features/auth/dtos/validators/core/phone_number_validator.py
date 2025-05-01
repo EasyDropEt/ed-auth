@@ -17,7 +17,7 @@ class PhoneNumberValidator(ABCDtoValidator[PhoneNumber]):
         if not email:
             errors.append("Phone number is required.")
         else:
-            if not re.match(r"^(\+251|0)?9\d{8}$", email):
+            if not re.match(r"^(\+251|0|251)?9\d{8}$", email):
                 errors.append("Invalid phone number format.")
 
         if len(errors):
