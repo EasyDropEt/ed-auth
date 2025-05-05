@@ -1,4 +1,12 @@
+from enum import StrEnum
 from typing import TypedDict
+
+
+class Environment(StrEnum):
+    TEST = "test"
+    DEV = "development"
+    STAGING = "staging"
+    PROD = "prod"
 
 
 class Config(TypedDict):
@@ -9,6 +17,7 @@ class Config(TypedDict):
     jwt_secret: str
     jwt_algorithm: str
     password_scheme: str
+    env: Environment
 
 
 class TestMessage(TypedDict):
