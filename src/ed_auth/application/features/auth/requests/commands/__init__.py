@@ -8,6 +8,10 @@ from ed_auth.application.features.auth.requests.commands.login_user_command impo
     LoginUserCommand
 from ed_auth.application.features.auth.requests.commands.login_user_verify_command import \
     LoginUserVerifyCommand
+from ed_auth.application.features.auth.requests.commands.logout_user_command import \
+    LogoutUserCommand
+from ed_auth.application.features.auth.requests.commands.update_user_command import \
+    UpdateUserCommand
 from ed_auth.application.features.auth.requests.commands.verify_token_command import \
     VerifyTokenCommand
 
@@ -17,5 +21,7 @@ __all__ = [
     "DeleteUserCommand",
     "LoginUserCommand",
     "LoginUserVerifyCommand",
+    "LogoutUserCommand",
     "VerifyTokenCommand",
+    "UpdateUserCommand",
 ]

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from ed_domain.services.common.api_response import ApiResponse
+from ed_domain.documentation.common.api_response import ApiResponse
 
 from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     CreateUserVerifyDto,
@@ -8,6 +8,9 @@ from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     LoginUserVerifyDto,
                                                     UnverifiedUserDto, UserDto,
                                                     VerifyTokenDto)
+from ed_auth.application.features.auth.dtos.logout_dto import LogoutDto
+from ed_auth.application.features.auth.dtos.update_user_dto import \
+    UpdateUserDto
 from ed_auth.common.api_helpers import ApiClient
 from ed_auth.documentation.abc_auth_api_client import ABCAuthApiClient
 from ed_auth.documentation.endpoints import AuthEndpoint
@@ -59,9 +62,30 @@ class AuthApiClient(ABCAuthApiClient):
 
         return api_client({"request": verify_token_dto})
 
+    def logout(self, logout_dto: LogoutDto) -> ApiResponse[None]:
+        endpoint = self._driver_endpoints.get_description("logout")
+
+        api_client = ApiClient[None](endpoint)
+
+        return api_client({"request": logout_dto})
+
     def delete_user(self, id: UUID) -> ApiResponse[None]:
         endpoint = self._driver_endpoints.get_description("delete_user")
 
         api_client = ApiClient[None](endpoint)
 
         return api_client({"path_params": {"user_id": str(id)}})
+
+    def update_user(
+        self, id: UUID, update_user_dto: UpdateUserDto
+    ) -> ApiResponse[UserDto]:
+        endpoint = self._driver_endpoints.get_description("update_user")
+
+        api_client = ApiClient[None](endpoint)
+
+        return api_client(
+            {
+                "request": update_user_dto,
+                "path_params": {"user_id": str(id)},
+            }
+        )
