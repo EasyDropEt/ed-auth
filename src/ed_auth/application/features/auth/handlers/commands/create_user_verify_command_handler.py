@@ -3,11 +3,11 @@ from ed_domain.common.logging import get_logger
 from ed_domain.core.entities.otp import OtpVerificationAction
 from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
 from ed_domain.tokens.auth_payload import AuthPayload, UserType
+from ed_domain.utils.jwt import ABCJwtHandler
 from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from ed_auth.application.common.responses.base_response import BaseResponse
-from ed_auth.application.contracts.infrastructure.utils.abc_jwt import ABCJwt
 from ed_auth.application.features.auth.dtos import UserDto
 from ed_auth.application.features.auth.dtos.validators.create_user_verify_dto_validator import \
     CreateUserVerifyDtoValidator
@@ -19,7 +19,11 @@ LOG = get_logger()
 
 @request_handler(CreateUserVerifyCommand, BaseResponse[UserDto])
 class CreateUserVerifyCommandHandler(RequestHandler):
-    def __init__(self, uow: ABCUnitOfWork, jwt: ABCJwt):
+    def __init__(
+        self,
+        uow: ABCUnitOfWork,
+        jwt: ABCJwtHandler[AuthPayload],
+    ):
         self._uow = uow
         self._jwt = jwt
         self._dto_validator = CreateUserVerifyDtoValidator()
@@ -35,7 +39,7 @@ class CreateUserVerifyCommandHandler(RequestHandler):
             )
 
         dto = request.dto
-        user = self._uow.user_repository.get(id=dto["user_id"])
+        user = self._uow.auth_user_repository.get(id=dto["user_id"])
         if not user:
             raise ApplicationException(
                 Exceptions.NotFoundException,

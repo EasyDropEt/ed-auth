@@ -17,14 +17,14 @@ class DeleteUserCommandHandler(RequestHandler):
         self._uow = uow
 
     async def handle(self, request: DeleteUserCommand) -> BaseResponse[None]:
-        if self._uow.user_repository.get(id=request.id) is None:
+        if self._uow.auth_user_repository.get(id=request.id) is None:
             raise ApplicationException(
                 Exceptions.NotFoundException,
                 "User deletion failed.",
                 ["User not found."],
             )
 
-        if not self._uow.user_repository.delete(request.id):
+        if not self._uow.auth_user_repository.delete(request.id):
             raise ApplicationException(
                 Exceptions.InternalServerException,
                 "User deletion failed.",

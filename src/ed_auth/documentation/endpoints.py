@@ -1,13 +1,17 @@
-from ed_domain.services.common.base_endpoint import BaseEndpoint
-from ed_domain.services.common.endpoint_description import EndpointDescription
-from ed_domain.services.common.http_method import HttpMethod
+from ed_domain.documentation.common.base_endpoint import BaseEndpoint
+from ed_domain.documentation.common.endpoint_description import \
+    EndpointDescription
+from ed_domain.documentation.common.http_method import HttpMethod
 
 from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     CreateUserVerifyDto,
                                                     LoginUserDto,
                                                     LoginUserVerifyDto,
+                                                    LogoutDto,
                                                     UnverifiedUserDto, UserDto,
                                                     VerifyTokenDto)
+from ed_auth.application.features.auth.dtos.update_user_dto import \
+    UpdateUserDto
 
 
 class AuthEndpoint(BaseEndpoint):
@@ -50,12 +54,26 @@ class AuthEndpoint(BaseEndpoint):
                 "request_model": VerifyTokenDto,
                 "response_model": UserDto,
             },
+            {
+                "name": "logout",
+                "method": HttpMethod.POST,
+                "path": f"{self._base_url}/logout",
+                "request_model": LogoutDto,
+            },
             # User endpoints
             {
                 "name": "delete_user",
                 "method": HttpMethod.DELETE,
                 "path": f"{self._base_url}/users/{{user_id}}",
                 "path_params": {"user_id": str},
+            },
+            {
+                "name": "update_user",
+                "method": HttpMethod.PUT,
+                "path": f"{self._base_url}/users/{{user_id}}",
+                "path_params": {"user_id": str},
+                "request_model": UpdateUserDto,
+                "response_model": UserDto,
             },
         ]
 

@@ -1,17 +1,18 @@
+from ed_domain.common.logging import get_logger
 from fastapi import APIRouter, Depends
 from rmediator.decorators.request_handler import Annotated
 from rmediator.mediator import Mediator
 
 from ed_auth.application.features.auth.dtos import (CreateUserDto,
-                                                CreateUserVerifyDto,
-                                                LoginUserDto,
-                                                LoginUserVerifyDto,
-                                                UnverifiedUserDto, UserDto,
-                                                VerifyTokenDto)
+                                                    CreateUserVerifyDto,
+                                                    LoginUserDto,
+                                                    LoginUserVerifyDto,
+                                                    LogoutDto,
+                                                    UnverifiedUserDto, UserDto,
+                                                    VerifyTokenDto)
 from ed_auth.application.features.auth.requests.commands import (
     CreateUserCommand, CreateUserVerifyCommand, LoginUserCommand,
-    LoginUserVerifyCommand, VerifyTokenCommand)
-from ed_domain.common.logging import get_logger
+    LoginUserVerifyCommand, LogoutUserCommand, VerifyTokenCommand)
 from ed_auth.webapi.common.helpers import GenericResponse, rest_endpoint
 from ed_auth.webapi.dependency_setup import mediator
 
@@ -57,3 +58,12 @@ async def token(
     request: VerifyTokenDto, mediator: Annotated[Mediator, Depends(mediator)]
 ):
     return await mediator.send(VerifyTokenCommand(dto=request))
+
+
+@ROUTER.post("/logout", response_model=GenericResponse[UserDto])
+@rest_endpoint
+async def logout(
+    request: LogoutDto,
+    mediator: Annotated[Mediator, Depends(mediator)],
+):
+    return await mediator.send(LogoutUserCommand(dto=request))

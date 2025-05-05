@@ -3,7 +3,7 @@ import uuid
 
 from dotenv import load_dotenv
 
-from ed_auth.common.typing.config import Config
+from ed_auth.common.typing.config import Config, Environment
 
 
 def get_new_id() -> uuid.UUID:
@@ -21,4 +21,5 @@ def get_config() -> Config:
         "jwt_secret": os.getenv("JWT_SECRET") or "",
         "jwt_algorithm": os.getenv("JWT_ALGORITHM") or "",
         "password_scheme": os.getenv("PASSWORD_SCHEME") or "",
+        "env": Environment.PROD if os.getenv("ENV") == "prod" else Environment.DEV,
     }

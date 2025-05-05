@@ -1,17 +1,21 @@
 from abc import ABCMeta, abstractmethod
 from uuid import UUID
 
-from ed_domain.services.common.api_response import ApiResponse
+from ed_domain.documentation.common.api_response import ApiResponse
 
 from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     CreateUserVerifyDto,
                                                     LoginUserDto,
                                                     LoginUserVerifyDto,
+                                                    LogoutDto,
                                                     UnverifiedUserDto, UserDto,
                                                     VerifyTokenDto)
+from ed_auth.application.features.auth.dtos.update_user_dto import \
+    UpdateUserDto
 
 
 class ABCAuthApiClient(metaclass=ABCMeta):
+    # Auth features
     @abstractmethod
     def create_get_otp(
         self, create_user_dto: CreateUserDto
@@ -38,4 +42,13 @@ class ABCAuthApiClient(metaclass=ABCMeta):
     ) -> ApiResponse[UserDto]: ...
 
     @abstractmethod
+    def logout(self, logout_dto: LogoutDto) -> ApiResponse[None]: ...
+
+    # User features
+    @abstractmethod
     def delete_user(self, id: UUID) -> ApiResponse[None]: ...
+
+    @abstractmethod
+    def update_user(
+        self, id: UUID, update_user_dto: UpdateUserDto
+    ) -> ApiResponse[UserDto]: ...

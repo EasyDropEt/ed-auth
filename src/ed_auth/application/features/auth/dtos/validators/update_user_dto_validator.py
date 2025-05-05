@@ -1,21 +1,13 @@
-from ed_auth.application.features.auth.dtos import CreateUserDto
+from ed_auth.application.features.auth.dtos import UpdateUserDto
 from ed_auth.application.features.auth.dtos.validators.core import (
     EmailValidator, PasswordValidator, PhoneNumberValidator)
 from ed_auth.application.features.common.dto.abc_dto_validator import (
     ABCDtoValidator, ValidationResponse)
 
 
-class CreateUserDtoValidator(ABCDtoValidator[CreateUserDto]):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def validate(self, dto: CreateUserDto) -> ValidationResponse:
+class UpdateUserDtoValidator(ABCDtoValidator[UpdateUserDto]):
+    def validate(self, dto: UpdateUserDto) -> ValidationResponse:
         errors = []
-        if not dto["first_name"]:
-            errors.append("First name is required")
-
-        if not dto["last_name"]:
-            errors.append("Last name is required")
 
         if dto.get("email") is None and dto.get("phone_number") is None:
             errors.append("Either email or phone number must be provided")
