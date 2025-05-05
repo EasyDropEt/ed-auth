@@ -11,8 +11,8 @@ PATH = "ed_auth.application.features.auth.handlers.commands.login_user_command_h
 
 generate_fixtures(
     (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
-    (f"{PATH}.ABCOtp", "mock_otp"),
-    (f"{PATH}.ABCPassword", "mock_password"),
+    (f"{PATH}.ABCOtpGenerator", "mock_otp"),
+    (f"{PATH}.ABCPasswordHandler", "mock_password"),
     (f"{PATH}.LoginUserCommand", "mock_login_user_command"),
     (f"{PATH}.LoginUserDtoValidator", "mock_login_user_dto_validator"),
 )
@@ -63,7 +63,7 @@ async def test_login_validation_failure(
         error in exc_info.value.errors
         for error in ["Invalid email format", "Password is required"]
     )
-    mock_unit_of_work.user_repository.get.assert_not_called()
+    mock_unit_of_work.auth_user_repository.get.assert_not_called()
     mock_unit_of_work.otp_repository.create.assert_not_called()
     mock_password.verify.assert_not_called()
     mock_otp.generate.assert_not_called()
@@ -85,13 +85,13 @@ async def test_login_with_email_success(
         "last_name": "Doe",
         "email": "john.doe@example.com",
         "phone_number": "1234567890",
-        "password": "hashedpassword",
+        "password_hash": "hashedpassword",
         "verified": True,
         "create_datetime": datetime.now(UTC),
         "update_datetime": datetime.now(UTC),
     }
 
-    mock_unit_of_work.user_repository.get.return_value = mock_user
+    mock_unit_of_work.auth_user_repository.get.return_value = mock_user
     mock_password.verify.return_value = True
     mock_otp.generate.return_value = "123456"
 
@@ -102,7 +102,7 @@ async def test_login_with_email_success(
     assert response.is_success is True
     assert response.message == "Otp sent successfully."
     assert response.data["id"] == mock_user["id"]
-    mock_unit_of_work.user_repository.get.assert_called_once_with(
+    mock_unit_of_work.auth_user_repository.get.assert_called_once_with(
         email="john.doe@example.com"
     )
     mock_unit_of_work.otp_repository.create.assert_called_once()
@@ -124,13 +124,13 @@ async def test_login_with_phone_success(
         "last_name": "Doe",
         "email": "john.doe@example.com",
         "phone_number": "1234567890",
-        "password": "hashedpassword",
+        "password_hash": "hashedpassword",
         "verified": True,
         "create_datetime": datetime.now(UTC),
         "update_datetime": datetime.now(UTC),
     }
 
-    mock_unit_of_work.user_repository.get.return_value = mock_user
+    mock_unit_of_work.auth_user_repository.get.return_value = mock_user
     mock_password.verify.return_value = True
     mock_otp.generate.return_value = "123456"
 
@@ -141,7 +141,7 @@ async def test_login_with_phone_success(
     assert response.is_success is True
     assert response.message == "Otp sent successfully."
     assert response.data["id"] == mock_user["id"]
-    mock_unit_of_work.user_repository.get.assert_called_once_with(
+    mock_unit_of_work.auth_user_repository.get.assert_called_once_with(
         phone_number="1234567890"
     )
     mock_unit_of_work.otp_repository.create.assert_called_once()
@@ -157,7 +157,7 @@ async def test_login_user_not_found(
         "password": "securepassword",
     }
 
-    mock_unit_of_work.user_repository.get.return_value = None
+    mock_unit_of_work.auth_user_repository.get.return_value = None
 
     # Act & Assert
     with pytest.raises(ApplicationException) as exc_info:
@@ -177,10 +177,10 @@ async def test_login_missing_password(
     mock_user = {
         "id": "user-id",
         "email": "john.doe@example.com",
-        "password": "hashedpassword",
+        "password_hash": "hashedpassword",
     }
 
-    mock_unit_of_work.user_repository.get.return_value = mock_user
+    mock_unit_of_work.auth_user_repository.get.return_value = mock_user
 
     # Act & Assert
     with pytest.raises(ApplicationException) as exc_info:
@@ -202,10 +202,10 @@ async def test_login_incorrect_password(
     mock_user = {
         "id": "user-id",
         "email": "john.doe@example.com",
-        "password": "hashedpassword",
+        "password_hash": "hashedpassword",
     }
 
-    mock_unit_of_work.user_repository.get.return_value = mock_user
+    mock_unit_of_work.auth_user_repository.get.return_value = mock_user
     mock_password.verify.return_value = False
 
     # Act & Assert

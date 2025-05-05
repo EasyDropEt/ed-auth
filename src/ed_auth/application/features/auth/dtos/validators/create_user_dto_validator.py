@@ -6,6 +6,9 @@ from ed_auth.application.features.common.dto.abc_dto_validator import (
 
 
 class CreateUserDtoValidator(ABCDtoValidator[CreateUserDto]):
+    def __init__(self) -> None:
+        super().__init__()
+
     def validate(self, dto: CreateUserDto) -> ValidationResponse:
         errors = []
         if not dto["first_name"]:

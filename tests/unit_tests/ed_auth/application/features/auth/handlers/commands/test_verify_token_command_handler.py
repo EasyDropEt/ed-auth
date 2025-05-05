@@ -11,7 +11,7 @@ PATH = (
 
 generate_fixtures(
     (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
-    (f"{PATH}.ABCJwt", "mock_jwt"),
+    (f"{PATH}.ABCJwtHandler", "mock_jwt"),
     (f"{PATH}.VerifyTokenCommand", "mock_verify_token_command"),
 )
 
@@ -38,9 +38,10 @@ async def test_valid_verify_token_command_handler(
 ):
     # Arrange
     mock_jwt.decode.return_value = {"email": "test@example.com"}
-    mock_unit_of_work.user_repository.get.return_value = {
+    mock_unit_of_work.auth_user_repository.get.return_value = {
         "email": "test@example.com",
         "name": "Test User",
+        "logged_in": True,
     }
     mock_verify_token_command.dto = {"token": "valid_token"}
 
@@ -79,7 +80,7 @@ async def test_verify_token_command_handler_user_not_found(
 ):
     # Arrange
     mock_jwt.decode.return_value = {"email": "notfound@example.com"}
-    mock_unit_of_work.user_repository.get.return_value = None
+    mock_unit_of_work.auth_user_repository.get.return_value = None
     mock_verify_token_command.dto = {"token": "valid_token"}
 
     # Act & Assert

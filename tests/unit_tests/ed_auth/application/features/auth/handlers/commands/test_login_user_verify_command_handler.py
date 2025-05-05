@@ -11,7 +11,7 @@ PATH = "ed_auth.application.features.auth.handlers.commands.login_user_verify_co
 
 generate_fixtures(
     (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
-    (f"{PATH}.ABCJwt", "mock_jwt"),
+    (f"{PATH}.ABCJwtHandler", "mock_jwt"),
     (f"{PATH}.LoginUserVerifyCommand", "mock_login_user_verify_command"),
     (f"{PATH}.LoginUserVerifyDtoValidator",
      "mock_login_user_verify_dto_validator"),
@@ -63,7 +63,7 @@ async def test_login_user_verify_validation_failure(
         error in exc_info.value.errors
         for error in ["User ID is required", "OTP must be 4 digits"]
     )
-    mock_unit_of_work.user_repository.get.assert_not_called()
+    mock_unit_of_work.auth_user_repository.get.assert_not_called()
     mock_unit_of_work.otp_repository.get.assert_not_called()
     mock_jwt.encode.assert_not_called()
 
@@ -89,7 +89,7 @@ async def test_login_user_verify_success(
 
     mock_login_user_verify_command.dto = {"user_id": "user-id", "otp": "1234"}
 
-    mock_unit_of_work.user_repository.get.return_value = mock_user
+    mock_unit_of_work.auth_user_repository.get.return_value = mock_user
     mock_unit_of_work.otp_repository.get.return_value = mock_otp
     mock_jwt.encode.return_value = "jwt-token"
 
@@ -119,7 +119,7 @@ async def test_login_user_verify_user_not_found(
     mock_login_user_verify_command.dto = {
         "user_id": "nonexistent-id", "otp": "1234"}
 
-    mock_unit_of_work.user_repository.get.return_value = None
+    mock_unit_of_work.auth_user_repository.get.return_value = None
 
     # Act & Assert
     with pytest.raises(ApplicationException) as exc_info:
@@ -143,7 +143,7 @@ async def test_login_user_verify_no_otp(
 
     mock_login_user_verify_command.dto = {"user_id": "user-id", "otp": "1234"}
 
-    mock_unit_of_work.user_repository.get.return_value = mock_user
+    mock_unit_of_work.auth_user_repository.get.return_value = mock_user
     mock_unit_of_work.otp_repository.get.return_value = None
 
     # Act & Assert
@@ -174,7 +174,7 @@ async def test_login_user_verify_wrong_action(
 
     mock_login_user_verify_command.dto = {"user_id": "user-id", "otp": "1234"}
 
-    mock_unit_of_work.user_repository.get.return_value = mock_user
+    mock_unit_of_work.auth_user_repository.get.return_value = mock_user
     mock_unit_of_work.otp_repository.get.return_value = mock_otp
 
     # Act & Assert
@@ -208,7 +208,7 @@ async def test_login_user_verify_incorrect_otp(
         "otp": "6543",  # Wrong OTP
     }
 
-    mock_unit_of_work.user_repository.get.return_value = mock_user
+    mock_unit_of_work.auth_user_repository.get.return_value = mock_user
     mock_unit_of_work.otp_repository.get.return_value = mock_otp
 
     # Act & Assert

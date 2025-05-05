@@ -1,8 +1,8 @@
 import pytest
+from ed_domain.common.exceptions import ApplicationException
 
 from ed_auth.application.features.auth.handlers.commands.create_user_command_handler import \
     CreateUserCommandHandler
-from ed_domain.common.exceptions import ApplicationException
 from tests.helpers.fixture_generator import generate_fixtures
 
 PATH = "ed_auth.application.features.auth.handlers.commands.create_user_command_handler"
@@ -10,8 +10,8 @@ PATH = "ed_auth.application.features.auth.handlers.commands.create_user_command_
 
 generate_fixtures(
     (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
-    (f"{PATH}.ABCOtp", "mock_otp"),
-    (f"{PATH}.ABCPassword", "mock_password"),
+    (f"{PATH}.ABCOtpGenerator", "mock_otp"),
+    (f"{PATH}.ABCPasswordHandler", "mock_password"),
     (f"{PATH}.CreateUserCommand", "mock_create_user_command"),
     (f"{PATH}.CreateUserDtoValidator", "mock_create_user_dto_validator"),
 )
@@ -53,7 +53,7 @@ async def test_create_user_success(
     mock_otp.generate.return_value = "123456"
     mock_create_user_dto_validator.validate.return_value.is_valid = True
 
-    mock_unit_of_work.user_repository.create.return_value = {
+    mock_unit_of_work.auth_user_repository.create.return_value = {
         "id": "user-id",
         "first_name": "John",
         "last_name": "Doe",
@@ -76,7 +76,7 @@ async def test_create_user_success(
     assert response.data["first_name"] == "John"
     assert response.data["last_name"] == "Doe"
 
-    mock_unit_of_work.user_repository.create.assert_called_once()
+    mock_unit_of_work.auth_user_repository.create.assert_called_once()
     mock_unit_of_work.otp_repository.create.assert_called_once()
     mock_password.hash.assert_called_once_with("SecurePassw0rd!")
     mock_otp.generate.assert_called_once()
@@ -134,7 +134,7 @@ async def test_create_user_validation_failure(
     print(exc_info.value.errors)
     assert "Creating account failed." == exc_info.value.message
     assert all(error in exc_info.value.errors for error in errors)
-    mock_unit_of_work.user_repository.create.assert_not_called()
+    mock_unit_of_work.auth_user_repository.create.assert_not_called()
     mock_unit_of_work.otp_repository.create.assert_not_called()
     mock_password.hash.assert_not_called()
     mock_otp.generate.assert_not_called()
