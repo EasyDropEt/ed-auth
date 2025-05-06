@@ -44,7 +44,7 @@ def get_jwt(config: Annotated[Config, Depends(get_config)]) -> ABCJwtHandler:
 
 
 def get_otp(config: Annotated[Config, Depends(get_config)]) -> ABCOtpGenerator:
-    return OtpGenerator(config["env"] == Environment.PROD)
+    return OtpGenerator(config["env"] != Environment.PROD)
 
 
 def get_password(config: Annotated[Config, Depends(get_config)]) -> ABCPasswordHandler:
@@ -61,13 +61,13 @@ def mediator(
 
     auth_handlers = [
         (CreateUserCommand, CreateUserCommandHandler(uow, otp, password)),
-        (DeleteUserCommand, DeleteUserCommandHandler(uow)),
         (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
         (LoginUserCommand, LoginUserCommandHandler(uow, otp, password)),
         (LoginUserVerifyCommand, LoginUserVerifyCommandHandler(uow, jwt)),
         (LogoutUserCommand, LogoutUserCommandHandler(uow, jwt)),
         (VerifyTokenCommand, VerifyTokenCommandHandler(uow, jwt)),
-        (UpdateUserCommand, UpdateUserCommandHandler(uow)),
+        (DeleteUserCommand, DeleteUserCommandHandler(uow)),
+        (UpdateUserCommand, UpdateUserCommandHandler(uow, password)),
     ]
     for request, handler in auth_handlers:
         mediator.register_handler(request, handler)

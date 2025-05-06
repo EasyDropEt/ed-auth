@@ -4,6 +4,7 @@ from ed_domain.common.exceptions import ApplicationException, Exceptions
 from ed_domain.common.logging import get_logger
 from ed_domain.core.entities import AuthUser
 from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
+from ed_domain.utils.security.password import ABCPasswordHandler
 from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
@@ -11,6 +12,7 @@ from ed_auth.application.common.responses.base_response import BaseResponse
 from ed_auth.application.features.auth.dtos import UnverifiedUserDto
 from ed_auth.application.features.auth.dtos.update_user_dto import \
     UpdateUserDto
+from ed_auth.application.features.auth.dtos.user_dto import UserDto
 from ed_auth.application.features.auth.dtos.validators import \
     UpdateUserDtoValidator
 from ed_auth.application.features.auth.requests.commands import \
@@ -19,15 +21,14 @@ from ed_auth.application.features.auth.requests.commands import \
 LOG = get_logger()
 
 
-@request_handler(UpdateUserCommand, BaseResponse[UnverifiedUserDto])
+@request_handler(UpdateUserCommand, BaseResponse[UserDto])
 class UpdateUserCommandHandler(RequestHandler):
-    def __init__(self, uow: ABCUnitOfWork):
+    def __init__(self, uow: ABCUnitOfWork, password: ABCPasswordHandler):
         self._uow = uow
         self._dto_validator = UpdateUserDtoValidator()
+        self._password = password
 
-    async def handle(
-        self, request: UpdateUserCommand
-    ) -> BaseResponse[UnverifiedUserDto]:
+    async def handle(self, request: UpdateUserCommand) -> BaseResponse[UserDto]:
         validation_response = self._dto_validator.validate(request.dto)
 
         if not validation_response.is_valid:
@@ -61,9 +62,9 @@ class UpdateUserCommandHandler(RequestHandler):
                 ),
             )
 
-            return BaseResponse[UnverifiedUserDto].success(
+            return BaseResponse[UserDto].success(
                 "User updated successfully.",
-                UnverifiedUserDto(**user),  # type: ignore
+                UserDto(**user),  # type: ignore
             )
 
         raise ApplicationException(
