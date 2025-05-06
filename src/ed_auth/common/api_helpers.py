@@ -2,10 +2,11 @@ from typing import Generic, TypeVar
 
 import jsons
 import requests
-
-from ed_domain.services.common.api_response import ApiResponse
-from ed_domain.services.common.endpoint_call_params import EndpointCallParams
-from ed_domain.services.common.endpoint_description import EndpointDescription
+from ed_domain.documentation.common.api_response import ApiResponse
+from ed_domain.documentation.common.endpoint_call_params import \
+    EndpointCallParams
+from ed_domain.documentation.common.endpoint_description import \
+    EndpointDescription
 
 T = TypeVar("T")
 
