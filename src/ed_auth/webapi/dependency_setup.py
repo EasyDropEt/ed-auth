@@ -44,7 +44,7 @@ def get_jwt(config: Annotated[Config, Depends(get_config)]) -> ABCJwtHandler:
 
 
 def get_otp(config: Annotated[Config, Depends(get_config)]) -> ABCOtpGenerator:
-    return OtpGenerator(config["env"] == Environment.PROD)
+    return OtpGenerator(config["env"] != Environment.PROD)
 
 
 def get_password(config: Annotated[Config, Depends(get_config)]) -> ABCPasswordHandler:
