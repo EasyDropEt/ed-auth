@@ -2,15 +2,13 @@ from typing import Generic, TypeVar
 
 import jsons
 import requests
+from ed_domain.common.exceptions import ApplicationException, Exceptions
 from ed_domain.common.logging import get_logger
 from ed_domain.documentation.common.api_response import ApiResponse
 from ed_domain.documentation.common.endpoint_call_params import \
     EndpointCallParams
 from ed_domain.documentation.common.endpoint_description import \
     EndpointDescription
-
-from src.ed_auth.common.exception_helpers import (ApplicationException,
-                                                  Exceptions)
 
 T = TypeVar("T")
 LOG = get_logger()
