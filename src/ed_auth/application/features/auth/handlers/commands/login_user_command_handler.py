@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 from ed_domain.common.exceptions import ApplicationException, Exceptions
 from ed_domain.common.logging import get_logger
 from ed_domain.core.entities import Otp
+from ed_domain.core.entities.notification import NotificationType
 from ed_domain.core.entities.otp import OtpVerificationAction
 from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
 from ed_domain.utils.otp import ABCOtpGenerator
@@ -11,6 +12,7 @@ from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from ed_auth.application.common.responses.base_response import BaseResponse
+from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
 from ed_auth.application.features.auth.dtos.unverified_user_dto import \
     UnverifiedUserDto
 from ed_auth.application.features.auth.dtos.validators.login_user_dto_validator import \
@@ -25,8 +27,13 @@ LOG = get_logger()
 @request_handler(LoginUserCommand, BaseResponse[UnverifiedUserDto])
 class LoginUserCommandHandler(RequestHandler):
     def __init__(
-        self, uow: ABCUnitOfWork, otp: ABCOtpGenerator, password: ABCPasswordHandler
+        self,
+        api: ABCApi,
+        uow: ABCUnitOfWork,
+        otp: ABCOtpGenerator,
+        password: ABCPasswordHandler,
     ):
+        self._api = api
         self._uow = uow
         self._otp = otp
         self._password = password
@@ -80,7 +87,7 @@ class LoginUserCommandHandler(RequestHandler):
         if previously_sent_otp := self._uow.otp_repository.get(user_id=user["id"]):
             self._uow.otp_repository.delete(previously_sent_otp["id"])
 
-        self._uow.otp_repository.create(
+        created_otp = self._uow.otp_repository.create(
             Otp(
                 id=get_new_id(),
                 user_id=user["id"],
@@ -92,6 +99,23 @@ class LoginUserCommandHandler(RequestHandler):
                 deleted=False,
             )
         )
+
+        notification_response = self._api.notification_api.send_notification(
+            {
+                "user_id": user["id"],
+                "message": f"Your OTP for logging in is {created_otp['value']}",
+                "notification_type": NotificationType.EMAIL,
+            }
+        )
+        if not notification_response["is_success"]:
+            LOG.error(
+                f"Failed to send OTP to user {user['id']}: {notification_response['errors']}"
+            )
+            raise ApplicationException(
+                Exceptions.InternalServerException,
+                "Login failed.",
+                ["Failed to send OTP."],
+            )
 
         return BaseResponse[UnverifiedUserDto].success(
             "Otp sent successfully.",

@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from ed_domain.common.exceptions import ApplicationException, Exceptions
 from ed_domain.common.logging import get_logger
 from ed_domain.core.entities import AuthUser, Otp
+from ed_domain.core.entities.notification import NotificationType
 from ed_domain.core.entities.otp import OtpVerificationAction
 from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
 from ed_domain.utils.otp import ABCOtpGenerator
@@ -11,6 +12,7 @@ from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from ed_auth.application.common.responses.base_response import BaseResponse
+from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
 from ed_auth.application.features.auth.dtos import UnverifiedUserDto
 from ed_auth.application.features.auth.dtos.validators import \
     CreateUserDtoValidator
@@ -24,8 +26,13 @@ LOG = get_logger()
 @request_handler(CreateUserCommand, BaseResponse[UnverifiedUserDto])
 class CreateUserCommandHandler(RequestHandler):
     def __init__(
-        self, uow: ABCUnitOfWork, otp: ABCOtpGenerator, password: ABCPasswordHandler
+        self,
+        api: ABCApi,
+        uow: ABCUnitOfWork,
+        otp: ABCOtpGenerator,
+        password: ABCPasswordHandler,
     ):
+        self._api = api
         self._uow = uow
         self._otp = otp
         self._password = password
@@ -64,7 +71,7 @@ class CreateUserCommandHandler(RequestHandler):
             )
         )
 
-        self._uow.otp_repository.create(
+        created_otp = self._uow.otp_repository.create(
             Otp(
                 id=get_new_id(),
                 user_id=user["id"],
@@ -77,7 +84,24 @@ class CreateUserCommandHandler(RequestHandler):
             )
         )
 
+        notification_response = self._api.notification_api.send_notification(
+            {
+                "user_id": user["id"],
+                "message": f"Your OTP for logging in is {created_otp['value']}",
+                "notification_type": NotificationType.EMAIL,
+            }
+        )
+        if not notification_response["is_success"]:
+            LOG.error(
+                f"Failed to send OTP to user {user['id']}: {notification_response['errors']}"
+            )
+            raise ApplicationException(
+                Exceptions.InternalServerException,
+                "Creating account failed.",
+                ["Failed to send OTP."],
+            )
+
         return BaseResponse[UnverifiedUserDto].success(
-            "Otp sent successfully.",
+            "User created successfully. Verify email.",
             UnverifiedUserDto(**user),  # type: ignore
         )
