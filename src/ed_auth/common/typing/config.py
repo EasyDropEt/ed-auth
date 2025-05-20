@@ -9,15 +9,28 @@ class Environment(StrEnum):
     PROD = "prod"
 
 
-class Config(TypedDict):
+class DBConfig(TypedDict):
     mongo_db_connection_string: str
     db_name: str
-    rabbitmq_url: str
-    rabbitmq_queue: str
-    jwt_secret: str
-    jwt_algorithm: str
+
+
+class RabbitMQConfig(TypedDict):
+    url: str
+    queue: str
+
+
+class JwtConfig(TypedDict):
+    secret: str
+    algorithm: str
+
+
+class Config(TypedDict):
+    db: DBConfig
+    rabbitmq: RabbitMQConfig
+    jwt: JwtConfig
     password_scheme: str
     env: Environment
+    notification_api: str
 
 
 class TestMessage(TypedDict):
