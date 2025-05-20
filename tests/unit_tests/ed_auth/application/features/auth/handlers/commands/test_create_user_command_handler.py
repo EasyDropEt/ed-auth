@@ -9,6 +9,7 @@ PATH = "ed_auth.application.features.auth.handlers.commands.create_user_command_
 
 
 generate_fixtures(
+    (f"{PATH}.ABCApi", "mock_api"),
     (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
     (f"{PATH}.ABCOtpGenerator", "mock_otp"),
     (f"{PATH}.ABCPasswordHandler", "mock_password"),
@@ -19,13 +20,14 @@ generate_fixtures(
 
 @pytest.fixture
 def handler(
+    mock_api,
     mock_unit_of_work,
     mock_otp,
     mock_password,
     mock_create_user_dto_validator,
 ):
     handler = CreateUserCommandHandler(
-        uow=mock_unit_of_work, otp=mock_otp, password=mock_password
+        api=mock_api, uow=mock_unit_of_work, otp=mock_otp, password=mock_password
     )
     handler._dto_validator = mock_create_user_dto_validator
 
@@ -69,9 +71,8 @@ async def test_create_user_success(
     response = await handler.handle(mock_create_user_command)
 
     # Assert
-    print(response.to_dict())
     assert response.is_success is True
-    assert response.message == "Otp sent successfully."
+    assert response.message == "User created successfully. Verify email."
     assert response.data is not None
     assert response.data["first_name"] == "John"
     assert response.data["last_name"] == "Doe"

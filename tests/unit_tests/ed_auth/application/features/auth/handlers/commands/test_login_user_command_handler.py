@@ -10,6 +10,7 @@ from tests.helpers.fixture_generator import generate_fixtures
 PATH = "ed_auth.application.features.auth.handlers.commands.login_user_command_handler"
 
 generate_fixtures(
+    (f"{PATH}.ABCApi", "mock_api"),
     (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
     (f"{PATH}.ABCOtpGenerator", "mock_otp"),
     (f"{PATH}.ABCPasswordHandler", "mock_password"),
@@ -20,13 +21,14 @@ generate_fixtures(
 
 @pytest.fixture
 def handler(
+    mock_api,
     mock_unit_of_work,
     mock_otp,
     mock_password,
     mock_login_user_dto_validator,
 ):
     handler = LoginUserCommandHandler(
-        uow=mock_unit_of_work, otp=mock_otp, password=mock_password
+        api=mock_api, uow=mock_unit_of_work, otp=mock_otp, password=mock_password
     )
     handler._dto_validator = mock_login_user_dto_validator
 
