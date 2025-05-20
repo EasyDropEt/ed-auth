@@ -9,9 +9,12 @@ from ed_infrastructure.persistence.mongo_db.unit_of_work import UnitOfWork
 from ed_infrastructure.utils.jwt import JwtHandler
 from ed_infrastructure.utils.otp import OtpGenerator
 from ed_infrastructure.utils.password import PasswordHandler
+from ed_notification.documentation.notification_api_client import \
+    NotificationApiClient
 from fastapi import Depends
 from rmediator.mediator import Mediator
 
+from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
 from ed_auth.application.features.auth.handlers.commands import (
     CreateUserCommandHandler, CreateUserVerifyCommandHandler,
     DeleteUserCommandHandler, LoginUserCommandHandler,
@@ -29,22 +32,27 @@ from ed_auth.application.features.auth.requests.commands.update_user_command imp
     UpdateUserCommand
 from ed_auth.common.generic_helpers import get_config
 from ed_auth.common.typing.config import Config, Environment
+from ed_auth.infrastructure.api_handler import ApiHandler
+
+
+def get_api_client(config: Annotated[Config, Depends(get_config)]) -> ABCApi:
+    return ApiHandler(NotificationApiClient(config["notification_api"]))
 
 
 def get_uow(config: Annotated[Config, Depends(get_config)]) -> ABCUnitOfWork:
     db_client = DbClient(
-        config["mongo_db_connection_string"],
-        config["db_name"],
+        config["db"]["mongo_db_connection_string"],
+        config["db"]["db_name"],
     )
     return UnitOfWork(db_client)
 
 
 def get_jwt(config: Annotated[Config, Depends(get_config)]) -> ABCJwtHandler:
-    return JwtHandler(config["jwt_secret"], config["jwt_algorithm"])
+    return JwtHandler(config["jwt"]["secret"], config["jwt"]["algorithm"])
 
 
 def get_otp(config: Annotated[Config, Depends(get_config)]) -> ABCOtpGenerator:
-    return OtpGenerator(config["env"] != Environment.PROD)
+    return OtpGenerator(dev_mode=config["env"] != Environment.PROD)
 
 
 def get_password(config: Annotated[Config, Depends(get_config)]) -> ABCPasswordHandler:
@@ -52,6 +60,7 @@ def get_password(config: Annotated[Config, Depends(get_config)]) -> ABCPasswordH
 
 
 def mediator(
+    api: Annotated[ABCApi, Depends(get_api_client)],
     uow: Annotated[ABCUnitOfWork, Depends(get_uow)],
     jwt: Annotated[ABCJwtHandler, Depends(get_jwt)],
     otp: Annotated[ABCOtpGenerator, Depends(get_otp)],
@@ -60,9 +69,9 @@ def mediator(
     mediator = Mediator()
 
     auth_handlers = [
-        (CreateUserCommand, CreateUserCommandHandler(uow, otp, password)),
+        (CreateUserCommand, CreateUserCommandHandler(api, uow, otp, password)),
         (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
-        (LoginUserCommand, LoginUserCommandHandler(uow, otp, password)),
+        (LoginUserCommand, LoginUserCommandHandler(api, uow, otp, password)),
         (LoginUserVerifyCommand, LoginUserVerifyCommandHandler(uow, jwt)),
         (LogoutUserCommand, LogoutUserCommandHandler(uow, jwt)),
         (VerifyTokenCommand, VerifyTokenCommandHandler(uow, jwt)),

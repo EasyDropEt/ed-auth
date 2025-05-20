@@ -537,13 +537,13 @@ files = [
 
 [[package]]
 name = "ed-domain"
-version = "0.2.17"
+version = "0.3.2"
 description = "EasyDrop domain model Package"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "ed_domain-0.2.17-py3-none-any.whl", hash = "sha256:20d822fae227142276c16e8a8ce578fe42197b18ee6d6fde7ea8c100ec367d53"},
+    {file = "ed_domain-0.3.2-py3-none-any.whl", hash = "sha256:8398afc0405774d1513abd7c534f338fe14e4fa027552a814a35268d588bffe1"},
 ]
 
 [package.extras]
@@ -558,6 +558,20 @@ python-versions = ">=3.12"
 groups = ["main"]
 files = [
     {file = "ed_infrastructure-0.1.7-py3-none-any.whl", hash = "sha256:170d2ef1a1607b83ddfdf23c002433d9e13f47074b7459f10a4e214ff713b7a0"},
+]
+
+[package.extras]
+dev = ["check-manifest"]
+
+[[package]]
+name = "ed-notification"
+version = "0.1.8"
+description = "EasyDrop notification model Package"
+optional = false
+python-versions = ">=3.12"
+groups = ["main"]
+files = [
+    {file = "ed_notification-0.1.8-py3-none-any.whl", hash = "sha256:ac25758616f2ec70d0e5978ff7e3c4c92b668567bb6222e126884bb2f67b1dde"},
 ]
 
 [package.extras]
@@ -2374,4 +2388,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "e5c38eb1e114a2c05260e88ccd261aeb2f236c624440117d6f1d122773ca8e2f"
+content-hash = "e956e9977ce7c5b7e98ebf1eb54d04dd060d78e68e6c971fa9c8a4281186c734"
