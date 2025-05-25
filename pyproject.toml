@@ -20,7 +20,7 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 pytest-asyncio = "^0.25.3"
 twine = "^6.1.0"
 ed-domain = "^0.3.3"
-ed-infrastructure = "^0.1.9"
+ed-infrastructure = "^0.1.12"
 jsons = "^1.6.3"
 ed-notification = "^0.1.8"
 
