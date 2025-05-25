@@ -15,7 +15,7 @@ rmediator = "^0.2.3"
 sqlalchemy = "^2.0.36"
 psycopg2 = "^2.9.10"
 pyjwt = "^2.10.1"
-pymongo = "^4.10.1"
+pymongo = "^4.13.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 pytest-asyncio = "^0.25.3"
 twine = "^6.1.0"
