@@ -16,11 +16,11 @@ from ed_auth.application.features.auth.requests.commands import (
 from ed_auth.webapi.common.helpers import GenericResponse, rest_endpoint
 from ed_auth.webapi.dependency_setup import mediator
 
-ROUTER = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 LOG = get_logger()
 
 
-@ROUTER.post("/create/get-otp", response_model=GenericResponse[UnverifiedUserDto])
+@router.post("/create/get-otp", response_model=GenericResponse[UnverifiedUserDto])
 @rest_endpoint
 async def create_user_get_otp(
     request: CreateUserDto, mediator: Annotated[Mediator, Depends(mediator)]
@@ -28,7 +28,7 @@ async def create_user_get_otp(
     return await mediator.send(CreateUserCommand(dto=request))
 
 
-@ROUTER.post("/create/verify-otp", response_model=GenericResponse[UserDto])
+@router.post("/create/verify-otp", response_model=GenericResponse[UserDto])
 @rest_endpoint
 async def create_user_verify_otp(
     request: CreateUserVerifyDto, mediator: Annotated[Mediator, Depends(mediator)]
@@ -36,7 +36,7 @@ async def create_user_verify_otp(
     return await mediator.send(CreateUserVerifyCommand(dto=request))
 
 
-@ROUTER.post("/login/get-otp", response_model=GenericResponse[UnverifiedUserDto])
+@router.post("/login/get-otp", response_model=GenericResponse[UnverifiedUserDto])
 @rest_endpoint
 async def login_get_otp(
     request: LoginUserDto, mediator: Annotated[Mediator, Depends(mediator)]
@@ -44,7 +44,7 @@ async def login_get_otp(
     return await mediator.send(LoginUserCommand(dto=request))
 
 
-@ROUTER.post("/login/verify-otp", response_model=GenericResponse[UserDto])
+@router.post("/login/verify-otp", response_model=GenericResponse[UserDto])
 @rest_endpoint
 async def login_verify_otp(
     request: LoginUserVerifyDto, mediator: Annotated[Mediator, Depends(mediator)]
@@ -52,7 +52,7 @@ async def login_verify_otp(
     return await mediator.send(LoginUserVerifyCommand(dto=request))
 
 
-@ROUTER.post("/token/verify", response_model=GenericResponse[UserDto])
+@router.post("/token/verify", response_model=GenericResponse[UserDto])
 @rest_endpoint
 async def token(
     request: VerifyTokenDto, mediator: Annotated[Mediator, Depends(mediator)]
@@ -60,7 +60,7 @@ async def token(
     return await mediator.send(VerifyTokenCommand(dto=request))
 
 
-@ROUTER.post("/logout", response_model=GenericResponse[UserDto])
+@router.post("/logout", response_model=GenericResponse[UserDto])
 @rest_endpoint
 async def logout(
     request: LogoutDto,

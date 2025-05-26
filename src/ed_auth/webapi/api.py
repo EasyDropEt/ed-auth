@@ -6,7 +6,8 @@ from starlette.responses import JSONResponse
 
 from ed_auth.common.singleton_helpers import SingletonMeta
 from ed_auth.webapi.common.helpers import GenericResponse
-from ed_auth.webapi.controllers import auth_controller, user_controller
+from ed_auth.webapi.controllers import (auth_controller, rabbitmq_controller,
+                                        user_controller)
 
 LOG = get_logger()
 
@@ -32,8 +33,9 @@ class API(metaclass=SingletonMeta):
 
     def _include_routers(self) -> None:
         LOG.info("Including routers...")
-        self._app.include_router(auth_controller.ROUTER)
-        self._app.include_router(user_controller.ROUTER)
+        self._app.include_router(auth_controller.router)
+        self._app.include_router(user_controller.router)
+        self._app.include_router(rabbitmq_controller.router)
 
     def _contain_exceptions(self) -> None:
         @self._app.exception_handler(ApplicationException)
