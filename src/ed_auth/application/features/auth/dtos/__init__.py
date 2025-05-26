@@ -2,6 +2,8 @@ from ed_auth.application.features.auth.dtos.create_user_dto import \
     CreateUserDto
 from ed_auth.application.features.auth.dtos.create_user_verify_dto import \
     CreateUserVerifyDto
+from ed_auth.application.features.auth.dtos.delete_user_dto import \
+    DeleteUserDto
 from ed_auth.application.features.auth.dtos.login_user_dto import LoginUserDto
 from ed_auth.application.features.auth.dtos.login_user_verify_dto import \
     LoginUserVerifyDto
@@ -17,6 +19,7 @@ from ed_auth.application.features.auth.dtos.verify_token_dto import \
 __all__ = [
     "CreateUserDto",
     "CreateUserVerifyDto",
+    "DeleteUserDto",
     "LoginUserDto",
     "LoginUserVerifyDto",
     "LogoutDto",
