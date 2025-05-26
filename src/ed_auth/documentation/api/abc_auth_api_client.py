@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from uuid import UUID
 
-from ed_domain.documentation.common.api_response import ApiResponse
+from ed_domain.documentation.api.definitions import ApiResponse
 
 from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     CreateUserVerifyDto,

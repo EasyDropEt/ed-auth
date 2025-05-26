@@ -1,7 +1,7 @@
-from ed_domain.documentation.common.base_endpoint import BaseEndpoint
-from ed_domain.documentation.common.endpoint_description import \
-    EndpointDescription
-from ed_domain.documentation.common.http_method import HttpMethod
+from ed_domain.documentation.api.abc_endpoint_descriptions import \
+    ABCEndpointDescriptions
+from ed_domain.documentation.api.definitions import (EndpointDescription,
+                                                     HttpMethod)
 
 from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     CreateUserVerifyDto,
@@ -14,7 +14,7 @@ from ed_auth.application.features.auth.dtos.update_user_dto import \
     UpdateUserDto
 
 
-class AuthEndpoint(BaseEndpoint):
+class AuthEndpointDescriptions(ABCEndpointDescriptions):
     def __init__(self, base_url: str):
         self._base_url = base_url
         self._descriptions: list[EndpointDescription] = [
