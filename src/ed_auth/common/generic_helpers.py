@@ -18,21 +18,39 @@ def get_config() -> Config:
 
     config = {
         "db": {
-            "mongo_db_connection_string": os.getenv("CONNECTION_STRING") or "",
-            "db_name": os.getenv("DB_NAME") or "",
+            "mongo_db_connection_string": _get_env_variable("CONNECTION_STRING"),
+            "db_name": _get_env_variable("DB_NAME"),
         },
         "rabbitmq": {
-            "url": os.getenv("RABBITMQ_URL") or "",
-            "queue": os.getenv("RABBITMQ_QUEUE") or "",
+            "url": _get_env_variable("RABBITMQ_URL"),
+            "queue": _get_env_variable("RABBITMQ_QUEUE"),
         },
         "jwt": {
-            "secret": os.getenv("JWT_SECRET") or "",
-            "algorithm": os.getenv("JWT_ALGORITHM") or "",
+            "secret": _get_env_variable("JWT_SECRET"),
+            "algorithm": _get_env_variable("JWT_ALGORITHM"),
         },
-        "password_scheme": os.getenv("PASSWORD_SCHEME") or "",
-        "env": Environment.PROD if os.getenv("ENV") == "prod" else Environment.DEV,
-        "notification_api": os.getenv("NOTIFICATION_API") or "",
+        "password_scheme": _get_env_variable("PASSWORD_SCHEME"),
+        "env": (
+            Environment.PROD if _get_env_variable(
+                "ENV") == "prod" else Environment.DEV
+        ),
+        "notification_api": _get_env_variable("NOTIFICATION_API"),
     }
 
     print("Configuration loaded:", config)
     return Config(**config)
+
+
+def _get_env_variable(name: str) -> str:
+    value = os.getenv(name)
+    if value is None:
+        raise ValueError(f"Environment variable '{name}' is not set.")
+
+    if not isinstance(value, str):
+        raise TypeError(f"Environment variable '{name}' must be a string.")
+
+    value = value.strip()
+    if not value:
+        raise ValueError(f"Environment variable '{name}' cannot be empty.")
+
+    return value
