@@ -15,8 +15,12 @@ from ed_auth.webapi.dependency_setup import mediator
 
 config = get_config()
 router = RabbitRouter(config["rabbitmq"]["url"])
-delete_user_queue = RabbitQueue(name="delete_user", durable=True)
-update_user_queue = RabbitQueue(name="update_user", durable=True)
+delete_user_queue = RabbitQueue(
+    name=config["rabbitmq"]["queues"]["delete_user"], durable=True
+)
+update_user_queue = RabbitQueue(
+    name=config["rabbitmq"]["queues"]["update_user"], durable=True
+)
 
 LOG = get_logger()
 
