@@ -1,4 +1,4 @@
-from ed_notification.documentation.abc_notification_api_client import \
+from ed_notification.documentation.api.abc_notification_api_client import \
     ABCNotificationApiClient
 
 from ed_auth.application.contracts.infrastructure.abc_api import ABCApi

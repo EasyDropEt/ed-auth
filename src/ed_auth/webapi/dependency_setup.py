@@ -9,7 +9,7 @@ from ed_infrastructure.persistence.mongo_db.unit_of_work import UnitOfWork
 from ed_infrastructure.utils.jwt import JwtHandler
 from ed_infrastructure.utils.otp import OtpGenerator
 from ed_infrastructure.utils.password import PasswordHandler
-from ed_notification.documentation.notification_api_client import \
+from ed_notification.documentation.api.notification_api_client import \
     NotificationApiClient
 from fastapi import Depends
 from rmediator.mediator import Mediator

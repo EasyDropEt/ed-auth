@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from ed_notification.documentation.abc_notification_api_client import \
+from ed_notification.documentation.api.abc_notification_api_client import \
     ABCNotificationApiClient
 
 
