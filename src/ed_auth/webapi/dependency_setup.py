@@ -15,6 +15,8 @@ from fastapi import Depends
 from rmediator.mediator import Mediator
 
 from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
+from ed_auth.application.contracts.infrastructure.abc_rabbitmq_producer import \
+    ABCRabbitMQProducers
 from ed_auth.application.features.auth.handlers.commands import (
     CreateUserCommandHandler, CreateUserVerifyCommandHandler,
     DeleteUserCommandHandler, LoginUserCommandHandler,
@@ -33,6 +35,13 @@ from ed_auth.application.features.auth.requests.commands.update_user_command imp
 from ed_auth.common.generic_helpers import get_config
 from ed_auth.common.typing.config import Config, Environment
 from ed_auth.infrastructure.api_handler import ApiHandler
+from ed_auth.infrastructure.rabbitmq_producers import RabbitMQProducers
+
+
+def get_rabbitmq_producers(
+    config: Annotated[Config, Depends(get_config)],
+) -> ABCRabbitMQProducers:
+    return RabbitMQProducers(config)
 
 
 def get_api_client(config: Annotated[Config, Depends(get_config)]) -> ABCApi:
@@ -60,6 +69,9 @@ def get_password(config: Annotated[Config, Depends(get_config)]) -> ABCPasswordH
 
 
 def mediator(
+    rabbitmq_producers: Annotated[
+        ABCRabbitMQProducers, Depends(get_rabbitmq_producers)
+    ],
     api: Annotated[ABCApi, Depends(get_api_client)],
     uow: Annotated[ABCUnitOfWork, Depends(get_uow)],
     jwt: Annotated[ABCJwtHandler, Depends(get_jwt)],
@@ -69,7 +81,11 @@ def mediator(
     mediator = Mediator()
 
     auth_handlers = [
-        (CreateUserCommand, CreateUserCommandHandler(api, uow, otp, password)),
+        (
+            CreateUserCommand,
+            CreateUserCommandHandler(
+                rabbitmq_producers, api, uow, otp, password),
+        ),
         (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
         (LoginUserCommand, LoginUserCommandHandler(api, uow, otp, password)),
         (LoginUserVerifyCommand, LoginUserVerifyCommandHandler(uow, jwt)),

@@ -13,6 +13,8 @@ from rmediator.types import RequestHandler
 
 from ed_auth.application.common.responses.base_response import BaseResponse
 from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
+from ed_auth.application.contracts.infrastructure.abc_rabbitmq_producer import \
+    ABCRabbitMQProducers
 from ed_auth.application.features.auth.dtos import UnverifiedUserDto
 from ed_auth.application.features.auth.dtos.validators import \
     CreateUserDtoValidator
@@ -27,11 +29,13 @@ LOG = get_logger()
 class CreateUserCommandHandler(RequestHandler):
     def __init__(
         self,
+        rabbitmq_prodcuers: ABCRabbitMQProducers,
         api: ABCApi,
         uow: ABCUnitOfWork,
         otp: ABCOtpGenerator,
         password: ABCPasswordHandler,
     ):
+        self._rabbitmq_prodcuers = rabbitmq_prodcuers
         self._api = api
         self._uow = uow
         self._otp = otp
@@ -41,14 +45,13 @@ class CreateUserCommandHandler(RequestHandler):
     async def handle(
         self, request: CreateUserCommand
     ) -> BaseResponse[UnverifiedUserDto]:
-        validation_response = self._dto_validator.validate(request.dto)
+        dto_validation_response = self._dto_validator.validate(request.dto)
 
-        print(self._dto_validator)
-        if not validation_response.is_valid:
+        if not dto_validation_response.is_valid:
             raise ApplicationException(
                 Exceptions.ValidationException,
                 "Creating account failed.",
-                validation_response.errors,
+                dto_validation_response.errors,
             )
 
         dto = request.dto
@@ -84,22 +87,13 @@ class CreateUserCommandHandler(RequestHandler):
             )
         )
 
-        notification_response = self._api.notification_api.send_notification(
+        self._rabbitmq_prodcuers.notification.send_notification(
             {
                 "user_id": user["id"],
                 "message": f"Your OTP for logging in is {created_otp['value']}",
                 "notification_type": NotificationType.EMAIL,
             }
         )
-        if not notification_response["is_success"]:
-            LOG.error(
-                f"Failed to send OTP to user {user['id']}: {notification_response['errors']}"
-            )
-            raise ApplicationException(
-                Exceptions.InternalServerException,
-                "Creating account failed.",
-                ["Failed to send OTP."],
-            )
 
         return BaseResponse[UnverifiedUserDto].success(
             "User created successfully. Verify email.",

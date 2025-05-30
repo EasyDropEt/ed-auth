@@ -16,22 +16,12 @@ def get_new_id() -> uuid.UUID:
 def get_config() -> Config:
     load_dotenv()
 
-    config: Config = {
+    return {
         "db": {
             "mongo_db_connection_string": _get_env_variable("CONNECTION_STRING"),
             "db_name": _get_env_variable("DB_NAME"),
         },
-        "rabbitmq": {
-            "url": _get_env_variable("RABBITMQ_URL"),
-            "queues": {
-                "delete_user": _get_env_variable(
-                    "RABBITMQ_SUBSCRIBE_DELETE_USER_QUEUE"
-                ),
-                "update_user": _get_env_variable(
-                    "RABBITMQ_SUBSCRIBE_UPDATE_USER_QUEUE"
-                ),
-            },
-        },
+        "rabbitmq": {"url": _get_env_variable("RABBITMQ_URL")},
         "jwt": {
             "secret": _get_env_variable("JWT_SECRET"),
             "algorithm": _get_env_variable("JWT_ALGORITHM"),
@@ -43,9 +33,6 @@ def get_config() -> Config:
         ),
         "notification_api": _get_env_variable("NOTIFICATION_API"),
     }
-
-    print("Configuration loaded:", config)
-    return Config(**config)
 
 
 def _get_env_variable(name: str) -> str:

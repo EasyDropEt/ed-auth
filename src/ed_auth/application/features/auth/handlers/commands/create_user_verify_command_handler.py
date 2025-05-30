@@ -29,13 +29,13 @@ class CreateUserVerifyCommandHandler(RequestHandler):
         self._dto_validator = CreateUserVerifyDtoValidator()
 
     async def handle(self, request: CreateUserVerifyCommand) -> BaseResponse[UserDto]:
-        dto_validator = self._dto_validator.validate(request.dto)
+        dto_validation_response = self._dto_validator.validate(request.dto)
 
-        if not dto_validator.is_valid:
+        if not dto_validation_response.is_valid:
             raise ApplicationException(
                 Exceptions.ValidationException,
                 "Otp verification failed.",
-                dto_validator.errors,
+                dto_validation_response.errors,
             )
 
         dto = request.dto

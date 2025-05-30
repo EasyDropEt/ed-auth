@@ -1,44 +1,62 @@
+from ed_domain.core.validation import (ABCValidator, ValidationError,
+                                       ValidationErrorType, ValidationResponse)
+from ed_infrastructure.validation.default import (EmailValidator,
+                                                  NameValidator,
+                                                  PasswordValidator,
+                                                  PhoneNumberValidator)
+
 from ed_auth.application.features.auth.dtos import CreateUserDto
-from ed_auth.application.features.auth.dtos.validators.core import (
-    EmailValidator, PasswordValidator, PhoneNumberValidator)
-from ed_auth.application.features.common.dto.abc_dto_validator import (
-    ABCDtoValidator, ValidationResponse)
 
 
-class CreateUserDtoValidator(ABCDtoValidator[CreateUserDto]):
-    def __init__(self) -> None:
+class CreateUserDtoValidator(ABCValidator[CreateUserDto]):
+    def __init__(self):
         super().__init__()
+        self._email_validator = EmailValidator()
+        self._phone_number_validator = PhoneNumberValidator()
+        self._password_validator = PasswordValidator()
+        self._name_validator = NameValidator()
 
-    def validate(self, dto: CreateUserDto) -> ValidationResponse:
-        errors = []
-        if not dto["first_name"]:
-            errors.append("First name is required")
+    def validate(
+        self, value: CreateUserDto, location: str = ABCValidator.DEFAULT_ERROR_LOCATION
+    ) -> ValidationResponse:
+        errors: list[ValidationError] = []
 
-        if not dto["last_name"]:
-            errors.append("Last name is required")
+        first_name_validation_response = self._name_validator.validate(
+            value["first_name"], f"{location}.first_name"
+        )
+        errors.extend(first_name_validation_response.errors)
 
-        if dto.get("email") is None and dto.get("phone_number") is None:
-            errors.append("Either email or phone number must be provided")
+        last_name_validation_response = self._name_validator.validate(
+            value["last_name"], f"{location}.last_name"
+        )
+        errors.extend(last_name_validation_response.errors)
 
-        if "email" in dto:
-            email_validation_response = EmailValidator().validate(
-                {"value": dto["email"]}
+        if value.get("email") is None and value.get("phone_number") is None:
+            errors.append(
+                {
+                    "location": f"{location}.email and {location}.phone_number",
+                    "message": "Either email or phone number must be provided",
+                    "input": f'{value.get("email")} or {value.get("phone_number")}',
+                    "type": ValidationErrorType.MISSING_FIELD,
+                }
+            )
+
+        if "email" in value:
+            email_validation_response = self._email_validator.validate(
+                value["email"], f"{location}.email"
             )
             errors.extend(email_validation_response.errors)
 
-        if "phone_number" in dto:
-            phone_number_validation_response = PhoneNumberValidator().validate(
-                {"value": dto["phone_number"]}
+        if "phone_number" in value:
+            phone_number_validation_response = self._phone_number_validator.validate(
+                value["phone_number"], f"{location}.phone_number"
             )
             errors.extend(phone_number_validation_response.errors)
 
-        if "password" in dto:
-            email_validation_response = PasswordValidator().validate(
-                {"value": dto["password"]}
+        if "password" in value:
+            password_validation_response = self._password_validator.validate(
+                value["password"], f"{location}.password"
             )
-            errors.extend(email_validation_response.errors)
+            errors.extend(password_validation_response.errors)
 
-        if len(errors):
-            return ValidationResponse.invalid(errors)
-
-        return ValidationResponse.valid()
+        return ValidationResponse(errors)

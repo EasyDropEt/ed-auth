@@ -16,7 +16,6 @@ class DBConfig(TypedDict):
 
 class RabbitMQConfig(TypedDict):
     url: str
-    queues: dict[str, str]
 
 
 class JwtConfig(TypedDict):
