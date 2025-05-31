@@ -1,11 +1,13 @@
-from ed_domain.documentation.message_queue.rabbitmq.abc_queue_descriptions import (
-    ABCQueueDescriptions, AuthQueues)
+from ed_domain.documentation.message_queue.rabbitmq.abc_queue_descriptions import \
+    ABCQueueDescriptions
 from ed_domain.documentation.message_queue.rabbitmq.definitions.queue_description import \
     QueueDescription
 
 from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     DeleteUserDto,
                                                     UpdateUserDto)
+from ed_auth.documentation.message_queue.rabbitmq.abc_auth_rabbitmq_subscriber import \
+    AuthQueues
 
 
 class AuthQueueDescriptions(ABCQueueDescriptions):
