@@ -22,21 +22,21 @@ config = get_config()
 router = RabbitRouter(config["rabbitmq"]["url"])
 
 
-@router.subscriber(RabbitQueue(name=AuthQueues.CREATE_USER, durable=True))
+@router.subscriber(RabbitQueue(AuthQueues.CREATE_USER, durable=True))
 async def create_user(
     create_user_dto: CreateUserDto, mediator: Annotated[Mediator, Depends(mediator)]
 ):
     return await mediator.send(CreateUserCommand(create_user_dto))
 
 
-@router.subscriber(RabbitQueue(name=AuthQueues.DELETE_USER, durable=True))
+@router.subscriber(RabbitQueue(AuthQueues.DELETE_USER, durable=True))
 async def delete_user(
     delete_user_dto: DeleteUserDto, mediator: Annotated[Mediator, Depends(mediator)]
 ):
     return await mediator.send(DeleteUserCommand(delete_user_dto["id"]))
 
 
-@router.subscriber(RabbitQueue(name=AuthQueues.UPDATE_USER, durable=True))
+@router.subscriber(RabbitQueue(AuthQueues.UPDATE_USER, durable=True))
 async def update_user(
     update_user_dto: UpdateUserDto, mediator: Annotated[Mediator, Depends(mediator)]
 ):
