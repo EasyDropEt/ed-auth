@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from ed_domain.common.exceptions import ApplicationException, Exceptions
 from ed_domain.common.logging import get_logger
-from ed_domain.core.entities import AuthUser, Otp
+from ed_domain.core.entities import Otp
 from ed_domain.core.entities.notification import NotificationType
 from ed_domain.core.entities.otp import OtpVerificationAction
 from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
@@ -12,7 +12,6 @@ from rmediator.decorators import request_handler
 from rmediator.types import RequestHandler
 
 from ed_auth.application.common.responses.base_response import BaseResponse
-from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
 from ed_auth.application.contracts.infrastructure.abc_rabbitmq_producer import \
     ABCRabbitMQProducers
 from ed_auth.application.features.auth.dtos import UnverifiedUserDto
@@ -30,13 +29,11 @@ class CreateUserCommandHandler(RequestHandler):
     def __init__(
         self,
         rabbitmq_prodcuers: ABCRabbitMQProducers,
-        api: ABCApi,
         uow: ABCUnitOfWork,
         otp: ABCOtpGenerator,
         password: ABCPasswordHandler,
     ):
         self._rabbitmq_prodcuers = rabbitmq_prodcuers
-        self._api = api
         self._uow = uow
         self._otp = otp
         self._password = password
@@ -45,7 +42,9 @@ class CreateUserCommandHandler(RequestHandler):
     async def handle(
         self, request: CreateUserCommand
     ) -> BaseResponse[UnverifiedUserDto]:
-        dto_validation_response = self._dto_validator.validate(request.dto)
+        dto = request.dto
+        email, phone_number = dto.email, dto.phone_number
+        dto_validation_response = self._dto_validator.validate(dto)
 
         if not dto_validation_response.is_valid:
             raise ApplicationException(
@@ -54,26 +53,23 @@ class CreateUserCommandHandler(RequestHandler):
                 dto_validation_response.errors,
             )
 
-        dto = request.dto
-        hashed_password = (
-            self._password.hash(dto["password"]) if "password" in dto else ""
-        )
-        user = self._uow.auth_user_repository.create(
-            AuthUser(
-                id=get_new_id(),
-                first_name=dto["first_name"],
-                last_name=dto["last_name"],
-                email=dto.get("email", ""),
-                phone_number=dto.get("phone_number", ""),
-                password_hash=hashed_password,
-                verified=False,
-                create_datetime=datetime.now(UTC),
-                update_datetime=datetime.now(UTC),
-                deleted=False,
-                logged_in=False,
+        if email and self._uow.auth_user_repository.get(email=email):
+            raise ApplicationException(
+                Exceptions.ConflictException,
+                "Creating account failed.",
+                ["User with that email already exists."],
             )
-        )
 
+        if phone_number and self._uow.auth_user_repository.get(
+            phone_number=phone_number
+        ):
+            raise ApplicationException(
+                Exceptions.ConflictException,
+                "Creating account failed.",
+                ["User with that phone number already exists."],
+            )
+
+        user = request.dto.create_user(self._uow, self._password)
         created_otp = self._uow.otp_repository.create(
             Otp(
                 id=get_new_id(),
@@ -87,7 +83,7 @@ class CreateUserCommandHandler(RequestHandler):
             )
         )
 
-        self._rabbitmq_prodcuers.notification.send_notification(
+        await self._rabbitmq_prodcuers.notification.send_notification(
             {
                 "user_id": user["id"],
                 "message": f"Your OTP for logging in is {created_otp['value']}",

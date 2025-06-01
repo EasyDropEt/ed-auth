@@ -42,6 +42,7 @@ class LoginUserCommandHandler(RequestHandler):
     async def handle(
         self, request: LoginUserCommand
     ) -> BaseResponse[UnverifiedUserDto]:
+        dto = request.dto
         dto_validator = self._dto_validator.validate(request.dto)
 
         if not dto_validator.is_valid:
@@ -51,9 +52,7 @@ class LoginUserCommandHandler(RequestHandler):
                 dto_validator.errors,
             )
 
-        email, phone_number = request.dto.get("email", ""), request.dto.get(
-            "phone_number", ""
-        )
+        email, phone_number = dto.email, dto.phone_number
         user = (
             self._uow.auth_user_repository.get(email=email)
             if email
@@ -68,16 +67,14 @@ class LoginUserCommandHandler(RequestHandler):
             )
 
         if user["password_hash"]:
-            if "password" not in request.dto:
+            if dto.password is None:
                 raise ApplicationException(
                     Exceptions.BadRequestException,
                     "Login failed.",
                     ["Password is required."],
                 )
 
-            if not self._password.verify(
-                request.dto["password"], user["password_hash"]
-            ):
+            if not self._password.verify(dto.password, user["password_hash"]):
                 raise ApplicationException(
                     Exceptions.BadRequestException,
                     "Login failed.",
@@ -107,6 +104,7 @@ class LoginUserCommandHandler(RequestHandler):
                 "notification_type": NotificationType.EMAIL,
             }
         )
+
         if not notification_response["is_success"]:
             LOG.error(
                 f"Failed to send OTP to user {user['id']}: {notification_response['errors']}"
