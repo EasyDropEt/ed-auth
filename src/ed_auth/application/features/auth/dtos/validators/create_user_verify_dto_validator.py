@@ -18,18 +18,18 @@ class CreateUserVerifyDtoValidator(ABCValidator[CreateUserVerifyDto]):
     ) -> ValidationResponse:
         errors: list[ValidationError] = []
 
-        if not value["user_id"]:
+        if not value.user_id:
             errors.append(
                 {
                     "message": "User ID is required",
                     "location": f"{location}.user_id",
-                    "input": value["user_id"],
+                    "input": value.user_id,
                     "type": ValidationErrorType.MISSING_FIELD,
                 }
             )
 
         otp_validation_response = self._otp_validator.validate(
-            value["otp"], f"{location}.otp"
+            value.otp, f"{location}.otp"
         )
         errors.extend(otp_validation_response.errors)
 

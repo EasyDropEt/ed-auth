@@ -23,53 +23,53 @@ class UpdateUserDtoValidator(ABCValidator[UpdateUserDto]):
     ) -> ValidationResponse:
         errors: list[ValidationError] = []
 
-        if not value["id"]:
+        if not value.id:
             errors.append(
                 {
                     "message": "User ID is required",
                     "location": f"{location}.user_id",
-                    "input": value["id"],
+                    "input": value.id,
                     "type": ValidationErrorType.MISSING_FIELD,
                 }
             )
 
-        if "first_name" in value:
+        if value.first_name:
             first_name_validation_response = self._name_validator.validate(
-                value["first_name"], f"{location}.first_name"
+                value.first_name, f"{location}.first_name"
             )
             errors.extend(first_name_validation_response.errors)
 
-        if "last_name" in value:
+        if value.last_name:
             last_name_validation_response = self._name_validator.validate(
-                value["last_name"], f"{location}.last_name"
+                value.last_name, f"{location}.last_name"
             )
             errors.extend(last_name_validation_response.errors)
 
-        if value.get("email") is None and value.get("phone_number") is None:
+        if value.email is None and value.phone_number is None:
             errors.append(
                 {
                     "location": f"{location}.email and {location}.phone_number",
                     "message": "Either email or phone number must be provided",
-                    "input": f'{value.get("email")} or {value.get("phone_number")}',
+                    "input": f"{value.email} or {value.phone_number}",
                     "type": ValidationErrorType.MISSING_FIELD,
                 }
             )
 
-        if "email" in value:
+        if value.email:
             email_validation_response = self._email_validator.validate(
-                value["email"], f"{location}.email"
+                value.email, f"{location}.email"
             )
             errors.extend(email_validation_response.errors)
 
-        if "phone_number" in value:
+        if value.phone_number:
             phone_number_validation_response = self._phone_number_validator.validate(
-                value["phone_number"], f"{location}.phone_number"
+                value.phone_number, f"{location}.phone_number"
             )
             errors.extend(phone_number_validation_response.errors)
 
-        if "password" in value:
+        if value.password:
             password_validation_response = self._password_validator.validate(
-                value["password"], f"{location}.password"
+                value.password, f"{location}.password"
             )
             errors.extend(password_validation_response.errors)
 

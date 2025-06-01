@@ -1,7 +1,8 @@
-from typing import TypedDict
 from uuid import UUID
 
+from pydantic import BaseModel
 
-class LoginUserVerifyDto(TypedDict):
+
+class LoginUserVerifyDto(BaseModel):
     user_id: UUID
     otp: str

@@ -1,5 +1,5 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
 
-class LogoutDto(TypedDict):
+class LogoutDto(BaseModel):
     token: str

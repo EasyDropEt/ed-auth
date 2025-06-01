@@ -1,6 +1,7 @@
-from typing import TypedDict
 from uuid import UUID
 
+from pydantic import BaseModel
 
-class DeleteUserDto(TypedDict):
+
+class DeleteUserDto(BaseModel):
     id: UUID

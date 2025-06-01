@@ -1,7 +1,9 @@
-from typing import NotRequired, TypedDict
+from typing import Optional
+
+from pydantic import BaseModel
 
 
-class LoginUserDto(TypedDict):
-    email: NotRequired[str]
-    phone_number: NotRequired[str]
-    password: NotRequired[str]
+class LoginUserDto(BaseModel):
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    password: Optional[str] = None

@@ -1,10 +1,12 @@
-from typing import NotRequired, TypedDict
+from typing import Optional
+
+from pydantic import BaseModel
 
 
-class UpdateUserDto(TypedDict):
+class UpdateUserDto(BaseModel):
     id: str
-    first_name: NotRequired[str]
-    last_name: NotRequired[str]
-    phone_number: NotRequired[str]
-    password: NotRequired[str]
-    email: NotRequired[str]
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    password: Optional[str] = None
+    email: Optional[str] = None

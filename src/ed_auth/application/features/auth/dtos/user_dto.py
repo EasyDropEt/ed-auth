@@ -1,11 +1,13 @@
-from typing import NotRequired, TypedDict
+from typing import Optional
 from uuid import UUID
 
+from pydantic import BaseModel
 
-class UserDto(TypedDict):
+
+class UserDto(BaseModel):
     id: UUID
     first_name: str
     last_name: str
-    email: NotRequired[str]
-    phone_number: NotRequired[str]
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
     token: str

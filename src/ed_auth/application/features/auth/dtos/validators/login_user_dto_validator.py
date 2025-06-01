@@ -21,31 +21,31 @@ class LoginUserDtoValidator(ABCValidator[LoginUserDto]):
     ) -> ValidationResponse:
         errors: list[ValidationError] = []
 
-        if value.get("email") is None and value.get("phone_number") is None:
+        if value.email is None and value.phone_number is None:
             errors.append(
                 {
                     "location": f"{location}.email or {location}.phone_number",
                     "message": "Either email or phone number must be provided",
-                    "input": f'{value.get("email")} or {value.get("phone_number")}',
+                    "input": f"{value.email} or {value.phone_number}",
                     "type": ValidationErrorType.MISSING_FIELD,
                 }
             )
 
-        if "email" in value:
+        if value.email:
             email_validation_response = self._email_validator.validate(
-                value["email"], f"{location}.email"
+                value.email, f"{location}.email"
             )
             errors.extend(email_validation_response.errors)
 
-        if "phone_number" in value:
+        if value.phone_number:
             phone_number_validation_response = self._phone_number_validator.validate(
-                value["phone_number"], f"{location}.phone_number"
+                value.phone_number, f"{location}.phone_number"
             )
             errors.extend(phone_number_validation_response.errors)
 
-        if "password" in value:
+        if value.password:
             password_validation_response = self._password_validator.validate(
-                value["password"], f"{location}.password"
+                value.password, f"{location}.password"
             )
             errors.extend(password_validation_response.errors)
 
