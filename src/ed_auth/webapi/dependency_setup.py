@@ -83,8 +83,7 @@ def mediator(
     auth_handlers = [
         (
             CreateUserCommand,
-            CreateUserCommandHandler(
-                rabbitmq_producers, api, uow, otp, password),
+            CreateUserCommandHandler(rabbitmq_producers, uow, otp, password),
         ),
         (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
         (LoginUserCommand, LoginUserCommandHandler(api, uow, otp, password)),
