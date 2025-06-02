@@ -100,12 +100,18 @@ class LoginUserCommandHandler(RequestHandler):
             )
         )
 
-        notification_response = self._api.notification_api.send_notification(
+        LOG.info(
+            f"Created OTP for user {user['id']} with value {created_otp['value']}")
+        notification_response = await self._api.notification_api.send_notification(
             {
                 "user_id": user["id"],
                 "message": f"Your OTP for logging in is {created_otp['value']}",
                 "notification_type": NotificationType.EMAIL,
             }
+        )
+
+        LOG.info(
+            f"Notification response for user {user['id']}: {notification_response}"
         )
         if not notification_response["is_success"]:
             LOG.error(
