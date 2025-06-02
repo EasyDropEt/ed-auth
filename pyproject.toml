@@ -25,6 +25,7 @@ jsons = "^1.6.3"
 ed-notification = "0.1.16"
 faststream = {extras = ["rabbit"], version = "^0.5.42"}
 ed-core = "^0.2.24"
+aiohttp = "^3.12.6"
 
 
 [tool.poetry.group.test.dependencies]
