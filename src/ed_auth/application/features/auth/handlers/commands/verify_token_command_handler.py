@@ -30,7 +30,16 @@ class VerifyTokenCommandHandler(RequestHandler):
                 ["Token is malformed."],
             )
 
-        if user := await self._uow.auth_user_repository.get(email=payload["email"]):
+        async with self._uow.transaction():
+            user = await self._uow.auth_user_repository.get(email=payload["email"])
+
+            if user is None:
+                raise ApplicationException(
+                    Exceptions.UnauthorizedException,
+                    "Token validation failed.",
+                    ["User not found."],
+                )
+
             if not user.logged_in:
                 raise ApplicationException(
                     Exceptions.UnauthorizedException,
@@ -41,13 +50,7 @@ class VerifyTokenCommandHandler(RequestHandler):
             return BaseResponse[UserDto].success(
                 "Token validated.",
                 UserDto(
-                    **user,  # type: ignore
+                    **user.__dict__,
                     token=request.dto["token"],
                 ),
             )
-
-        raise ApplicationException(
-            Exceptions.UnauthorizedException,
-            "Token validation failed.",
-            ["User not found."],
-        )

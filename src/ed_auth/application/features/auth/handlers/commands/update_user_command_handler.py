@@ -39,7 +39,15 @@ class UpdateUserCommandHandler(RequestHandler):
                 validation_response.errors,
             )
 
-        if user := await self._uow.auth_user_repository.get(id=request.id):
+        async with self._uow.transaction():
+            user = await self._uow.auth_user_repository.get(id=request.id)
+            if user is None:
+                raise ApplicationException(
+                    Exceptions.NotFoundException,
+                    "User update failed.",
+                    ["User not found."],
+                )
+
             dto = request.dto
             await self._uow.auth_user_repository.update(
                 id=user.id,
@@ -62,11 +70,5 @@ class UpdateUserCommandHandler(RequestHandler):
 
             return BaseResponse[UserDto].success(
                 "User updated successfully.",
-                UserDto(**user),  # type: ignore
+                UserDto(**user.__dict__),
             )
-
-        raise ApplicationException(
-            Exceptions.NotFoundException,
-            "User update failed.",
-            ["User not found."],
-        )

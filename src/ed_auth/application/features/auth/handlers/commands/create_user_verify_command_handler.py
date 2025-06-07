@@ -40,15 +40,19 @@ class CreateUserVerifyCommandHandler(RequestHandler):
             )
 
         dto = request.dto
-        user = await self._uow.auth_user_repository.get(id=dto["user_id"])
-        if not user:
-            raise ApplicationException(
-                Exceptions.NotFoundException,
-                "Otp verification failed.",
-                [f"User with that id = {dto['user_id']} does not exist."],
-            )
 
-        otp = await self._uow.otp_repository.get(user_id=dto["user_id"])
+        async with self._uow.transaction():
+            user = await self._uow.auth_user_repository.get(id=dto["user_id"])
+
+            if not user:
+                raise ApplicationException(
+                    Exceptions.NotFoundException,
+                    "Otp verification failed.",
+                    [f"User with that id = {dto['user_id']} does not exist."],
+                )
+
+            otp = await self._uow.otp_repository.get(user_id=dto["user_id"])
+
         if not otp or otp.otp_type != OtpType.VERIFY_EMAIL:
             raise ApplicationException(
                 Exceptions.BadRequestException,
@@ -76,5 +80,5 @@ class CreateUserVerifyCommandHandler(RequestHandler):
         )
         return BaseResponse[UserDto].success(
             "Create successful.",
-            UserDto(**user, token=token),  # type: ignore
+            UserDto(**user.__dict__, token=token),
         )

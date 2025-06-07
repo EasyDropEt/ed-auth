@@ -55,6 +55,7 @@ class LoginUserCommandHandler(RequestHandler):
         email, phone_number = request.dto.get("email", ""), request.dto.get(
             "phone_number", ""
         )
+
         async with self._uow.transaction():
             user = (
                 await self._uow.auth_user_repository.get(email=email)
@@ -62,29 +63,30 @@ class LoginUserCommandHandler(RequestHandler):
                 else await self._uow.auth_user_repository.get(phone_number=phone_number)
             )
 
-        if user is None:
-            raise ApplicationException(
-                Exceptions.NotFoundException,
-                "Login failed.",
-                ["No user found with the given credentials."],
-            )
-
-        if user.password_hash:
-            if "password" not in request.dto:
+            if user is None:
                 raise ApplicationException(
-                    Exceptions.BadRequestException,
+                    Exceptions.NotFoundException,
                     "Login failed.",
-                    ["Password is required."],
+                    ["No user found with the given credentials."],
                 )
 
-            if not self._password.verify(request.dto["password"], user.password_hash):
-                raise ApplicationException(
-                    Exceptions.BadRequestException,
-                    "Login failed.",
-                    ["Password is incorrect."],
-                )
+            if user.password_hash:
+                if "password" not in request.dto:
+                    raise ApplicationException(
+                        Exceptions.BadRequestException,
+                        "Login failed.",
+                        ["Password is required."],
+                    )
 
-        async with self._uow.transaction():
+                if not self._password.verify(
+                    request.dto["password"], user.password_hash
+                ):
+                    raise ApplicationException(
+                        Exceptions.BadRequestException,
+                        "Login failed.",
+                        ["Password is incorrect."],
+                    )
+
             if previously_sent_otp := await self._uow.otp_repository.get(
                 user_id=user.id
             ):
@@ -128,5 +130,5 @@ class LoginUserCommandHandler(RequestHandler):
 
         return BaseResponse[UnverifiedUserDto].success(
             "Otp sent successfully.",
-            UnverifiedUserDto(**user),  # type: ignore
+            UnverifiedUserDto(**user.__dict__),
         )

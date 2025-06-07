@@ -16,6 +16,9 @@ class RabbitMQProducers(ABCRabbitMQProducers):
             config["rabbitmq"]["url"])
         # self._core = CoreRabbitMQSubscriber(config["rabbitmq"]["url"])
 
+    async def start(self):
+        await self._notification.start()
+
     @property
     def notification(self) -> ABCNotificationRabbitMQSubscriber:
         return self._notification

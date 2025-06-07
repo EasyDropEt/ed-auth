@@ -36,48 +36,51 @@ class LoginUserVerifyCommandHandler(RequestHandler):
             )
 
         dto = request.dto
-        user = await self._uow.auth_user_repository.get(id=dto["user_id"])
-        if not user:
-            raise ApplicationException(
-                Exceptions.NotFoundException,
-                "Login failed.",
-                [f"User with that id = {dto['user_id']} does not exist."],
+        async with self._uow.transaction():
+            user = await self._uow.auth_user_repository.get(id=dto["user_id"])
+
+            if not user:
+                raise ApplicationException(
+                    Exceptions.NotFoundException,
+                    "Login failed.",
+                    [f"User with that id = {dto['user_id']} does not exist."],
+                )
+
+            otp = await self._uow.otp_repository.get(user_id=dto["user_id"])
+
+            if not otp or otp.otp_type != OtpType.LOGIN:
+                raise ApplicationException(
+                    Exceptions.BadRequestException,
+                    "Login failed.",
+                    [
+                        f"Otp has not been sent to the user with id = {dto['user_id']} recently."
+                    ],
+                )
+
+            if otp.value != dto["otp"]:
+                raise ApplicationException(
+                    Exceptions.BadRequestException,
+                    "Login failed.",
+                    ["Otp does not match with the one sent."],
+                )
+
+            token = self._jwt.encode(
+                AuthPayload(
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                    email=user.email or "",
+                    phone_number=user.phone_number or "",
+                    user_type=UserType.DRIVER,
+                )
             )
 
-        otp = await self._uow.otp_repository.get(user_id=dto["user_id"])
-        if not otp or otp.otp_type != OtpType.LOGIN:
-            raise ApplicationException(
-                Exceptions.BadRequestException,
-                "Login failed.",
-                [
-                    f"Otp has not been sent to the user with id = {dto['user_id']} recently."
-                ],
-            )
-
-        if otp.value != dto["otp"]:
-            raise ApplicationException(
-                Exceptions.BadRequestException,
-                "Login failed.",
-                ["Otp does not match with the one sent."],
-            )
-
-        token = self._jwt.encode(
-            AuthPayload(
-                first_name=user.first_name,
-                last_name=user.last_name,
-                email=user.email or "",
-                phone_number=user.phone_number or "",
-                user_type=UserType.DRIVER,
-            )
-        )
-
-        user.logged_in = True
-        await self._uow.auth_user_repository.update(user.id, user)
+            user.log_in()
+            await self._uow.auth_user_repository.update(user.id, user)
 
         return BaseResponse[UserDto].success(
             "Login successful.",
             UserDto(
-                **user,  # type: ignore
+                **user.__dict__,
                 token=token,
             ),
         )

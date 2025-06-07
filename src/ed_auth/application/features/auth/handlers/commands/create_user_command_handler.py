@@ -60,36 +60,38 @@ class CreateUserCommandHandler(RequestHandler):
         hashed_password = (
             self._password.hash(dto["password"]) if "password" in dto else ""
         )
-        user = await self._uow.auth_user_repository.create(
-            AuthUser(
-                id=get_new_id(),
-                first_name=dto["first_name"],
-                last_name=dto["last_name"],
-                email=dto.get("email", ""),
-                phone_number=dto.get("phone_number", ""),
-                password_hash=hashed_password,
-                verified=False,
-                create_datetime=datetime.now(UTC),
-                update_datetime=datetime.now(UTC),
-                deleted=False,
-                logged_in=False,
-                deleted_datetime=None,
-            )
-        )
 
-        created_otp = await self._uow.otp_repository.create(
-            Otp(
-                id=get_new_id(),
-                user_id=user.id,
-                otp_type=OtpType.VERIFY_EMAIL,
-                create_datetime=datetime.now(UTC),
-                update_datetime=datetime.now(UTC),
-                expiry_datetime=datetime.now(UTC),
-                value=self._otp.generate(),
-                deleted=False,
-                deleted_datetime=None,
+        async with self._uow.transaction():
+            user = await self._uow.auth_user_repository.create(
+                AuthUser(
+                    id=get_new_id(),
+                    first_name=dto["first_name"],
+                    last_name=dto["last_name"],
+                    email=dto.get("email", ""),
+                    phone_number=dto.get("phone_number", ""),
+                    password_hash=hashed_password,
+                    verified=False,
+                    create_datetime=datetime.now(UTC),
+                    update_datetime=datetime.now(UTC),
+                    deleted=False,
+                    logged_in=False,
+                    deleted_datetime=None,
+                )
             )
-        )
+
+            created_otp = await self._uow.otp_repository.create(
+                Otp(
+                    id=get_new_id(),
+                    user_id=user.id,
+                    otp_type=OtpType.VERIFY_EMAIL,
+                    create_datetime=datetime.now(UTC),
+                    update_datetime=datetime.now(UTC),
+                    expiry_datetime=datetime.now(UTC),
+                    value=self._otp.generate(),
+                    deleted=False,
+                    deleted_datetime=None,
+                )
+            )
 
         await self._rabbitmq_prodcuers.notification.send_notification(
             {
@@ -101,5 +103,5 @@ class CreateUserCommandHandler(RequestHandler):
 
         return BaseResponse[UnverifiedUserDto].success(
             "User created successfully. Verify email.",
-            UnverifiedUserDto(**user),  # type: ignore
+            UnverifiedUserDto(**user.__dict__),
         )

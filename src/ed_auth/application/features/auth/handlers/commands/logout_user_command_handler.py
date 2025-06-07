@@ -29,7 +29,15 @@ class LogoutUserCommandHandler(RequestHandler):
                 ["Token is malformed."],
             )
 
-        if user := await self._uow.auth_user_repository.get(email=payload["email"]):
+        async with self._uow.transaction():
+            user = await self._uow.auth_user_repository.get(email=payload["email"])
+            if user is None:
+                raise ApplicationException(
+                    Exceptions.BadRequestException,
+                    "Logout failed.",
+                    ["User is not found."],
+                )
+
             if not user.logged_in:
                 raise ApplicationException(
                     Exceptions.BadRequestException,
@@ -37,15 +45,10 @@ class LogoutUserCommandHandler(RequestHandler):
                     ["User is not logged in."],
                 )
 
-            user.logged_in = False
+            user.log_out()
             await self._uow.auth_user_repository.update(user.id, user)
-            return BaseResponse[None].success(
-                "Logout successful.",
-                None,
-            )
 
-        raise ApplicationException(
-            Exceptions.UnauthorizedException,
-            "Logout failed.",
-            ["User not found."],
+        return BaseResponse[None].success(
+            "Logout successful.",
+            None,
         )

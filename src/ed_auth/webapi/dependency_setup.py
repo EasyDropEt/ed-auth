@@ -38,10 +38,13 @@ from ed_auth.infrastructure.api_handler import ApiHandler
 from ed_auth.infrastructure.rabbitmq_producers import RabbitMQProducers
 
 
-def get_rabbitmq_producers(
+async def get_rabbitmq_producers(
     config: Annotated[Config, Depends(get_config)],
 ) -> ABCRabbitMQProducers:
-    return RabbitMQProducers(config)
+    p = RabbitMQProducers(config)
+    await p.start()
+
+    return p
 
 
 def get_api_client(config: Annotated[Config, Depends(get_config)]) -> ABCApi:
