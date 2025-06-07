@@ -11,7 +11,7 @@ PATH = "ed_auth.application.features.auth.handlers.commands.login_user_command_h
 
 generate_fixtures(
     (f"{PATH}.ABCApi", "mock_api"),
-    (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
+    (f"{PATH}.ABCAsyncUnitOfWork", "mock_unit_of_work"),
     (f"{PATH}.ABCOtpGenerator", "mock_otp"),
     (f"{PATH}.ABCPasswordHandler", "mock_password"),
     (f"{PATH}.LoginUserCommand", "mock_login_user_command"),

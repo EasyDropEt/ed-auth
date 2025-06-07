@@ -1,5 +1,5 @@
-from ed_domain.core.validation import (ABCValidator, ValidationError,
-                                       ValidationErrorType, ValidationResponse)
+from ed_domain.validation import (ABCValidator, ValidationError,
+                                  ValidationErrorType, ValidationResponse)
 from ed_infrastructure.validation.default.otp_validator import OtpValidator
 
 from ed_auth.application.features.auth.dtos.create_user_verify_dto import \

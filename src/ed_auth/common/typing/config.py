@@ -9,9 +9,11 @@ class Environment(StrEnum):
     PROD = "prod"
 
 
-class DBConfig(TypedDict):
-    mongo_db_connection_string: str
-    db_name: str
+class DbConfig(TypedDict):
+    user: str
+    password: str
+    db: str
+    host: str
 
 
 class RabbitMQConfig(TypedDict):
@@ -24,7 +26,7 @@ class JwtConfig(TypedDict):
 
 
 class Config(TypedDict):
-    db: DBConfig
+    db: DbConfig
     rabbitmq: RabbitMQConfig
     jwt: JwtConfig
     password_scheme: str

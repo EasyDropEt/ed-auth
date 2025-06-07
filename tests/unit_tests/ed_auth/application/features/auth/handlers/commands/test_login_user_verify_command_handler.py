@@ -1,6 +1,6 @@
 import pytest
 from ed_domain.common.exceptions import ApplicationException
-from ed_domain.core.entities.otp import OtpVerificationAction
+from ed_domain.core.entities.otp import OtpType
 from ed_domain.tokens.auth_payload import UserType
 
 from ed_auth.application.features.auth.handlers.commands.login_user_verify_command_handler import \
@@ -10,7 +10,7 @@ from tests.helpers.fixture_generator import generate_fixtures
 PATH = "ed_auth.application.features.auth.handlers.commands.login_user_verify_command_handler"
 
 generate_fixtures(
-    (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
+    (f"{PATH}.ABCAsyncUnitOfWork", "mock_unit_of_work"),
     (f"{PATH}.ABCJwtHandler", "mock_jwt"),
     (f"{PATH}.LoginUserVerifyCommand", "mock_login_user_verify_command"),
     (f"{PATH}.LoginUserVerifyDtoValidator",
@@ -84,7 +84,7 @@ async def test_login_user_verify_success(
     mock_otp = {
         "user_id": "user-id",
         "value": "1234",
-        "action": OtpVerificationAction.LOGIN,
+        "action": OtpType.LOGIN,
     }
 
     mock_login_user_verify_command.dto = {"user_id": "user-id", "otp": "1234"}
@@ -169,7 +169,7 @@ async def test_login_user_verify_wrong_action(
     mock_otp = {
         "user_id": "user-id",
         "value": "1234",
-        "action": OtpVerificationAction.VERIFY_EMAIL,  # Wrong action
+        "action": OtpType.VERIFY_EMAIL,  # Wrong action
     }
 
     mock_login_user_verify_command.dto = {"user_id": "user-id", "otp": "1234"}
@@ -200,7 +200,7 @@ async def test_login_user_verify_incorrect_otp(
     mock_otp = {
         "user_id": "user-id",
         "value": "1234",
-        "action": OtpVerificationAction.LOGIN,
+        "action": OtpType.LOGIN,
     }
 
     mock_login_user_verify_command.dto = {

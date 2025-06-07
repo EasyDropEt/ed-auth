@@ -10,7 +10,7 @@ PATH = "ed_auth.application.features.auth.handlers.commands.create_user_command_
 
 generate_fixtures(
     (f"{PATH}.ABCApi", "mock_api"),
-    (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
+    (f"{PATH}.ABCAsyncUnitOfWork", "mock_unit_of_work"),
     (f"{PATH}.ABCOtpGenerator", "mock_otp"),
     (f"{PATH}.ABCPasswordHandler", "mock_password"),
     (f"{PATH}.CreateUserCommand", "mock_create_user_command"),

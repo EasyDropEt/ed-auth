@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
+from ed_domain.persistence.async_repositories.abc_async_unit_of_work import \
+    ABCAsyncUnitOfWork
 from ed_domain.utils.jwt import ABCJwtHandler
 from ed_domain.utils.otp import ABCOtpGenerator
 from ed_domain.utils.security.password import ABCPasswordHandler
-from ed_infrastructure.persistence.mongo_db.db_client import DbClient
-from ed_infrastructure.persistence.mongo_db.unit_of_work import UnitOfWork
+from ed_infrastructure.persistence.sqlalchemy.unit_of_work import UnitOfWork
 from ed_infrastructure.utils.jwt import JwtHandler
 from ed_infrastructure.utils.otp import OtpGenerator
 from ed_infrastructure.utils.password import PasswordHandler
@@ -48,12 +48,8 @@ def get_api_client(config: Annotated[Config, Depends(get_config)]) -> ABCApi:
     return ApiHandler(NotificationApiClient(config["notification_api"]))
 
 
-def get_uow(config: Annotated[Config, Depends(get_config)]) -> ABCUnitOfWork:
-    db_client = DbClient(
-        config["db"]["mongo_db_connection_string"],
-        config["db"]["db_name"],
-    )
-    return UnitOfWork(db_client)
+def get_uow(config: Annotated[Config, Depends(get_config)]) -> ABCAsyncUnitOfWork:
+    return UnitOfWork(config["db"])
 
 
 def get_jwt(config: Annotated[Config, Depends(get_config)]) -> ABCJwtHandler:
@@ -73,7 +69,7 @@ def mediator(
         ABCRabbitMQProducers, Depends(get_rabbitmq_producers)
     ],
     api: Annotated[ABCApi, Depends(get_api_client)],
-    uow: Annotated[ABCUnitOfWork, Depends(get_uow)],
+    uow: Annotated[ABCAsyncUnitOfWork, Depends(get_uow)],
     jwt: Annotated[ABCJwtHandler, Depends(get_jwt)],
     otp: Annotated[ABCOtpGenerator, Depends(get_otp)],
     password: Annotated[ABCPasswordHandler, Depends(get_password)],

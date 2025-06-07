@@ -8,7 +8,7 @@ from tests.helpers.fixture_generator import generate_fixtures
 PATH = "ed_auth.application.features.auth.handlers.commands.delete_user_command_handler"
 
 generate_fixtures(
-    (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
+    (f"{PATH}.ABCAsyncUnitOfWork", "mock_unit_of_work"),
     (f"{PATH}.DeleteUserCommand", "mock_delete_user_command"),
 )
 

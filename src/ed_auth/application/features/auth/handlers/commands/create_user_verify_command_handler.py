@@ -1,7 +1,8 @@
 from ed_domain.common.exceptions import ApplicationException, Exceptions
 from ed_domain.common.logging import get_logger
-from ed_domain.core.entities.otp import OtpVerificationAction
-from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
+from ed_domain.core.entities.otp import OtpType
+from ed_domain.persistence.async_repositories.abc_async_unit_of_work import \
+    ABCAsyncUnitOfWork
 from ed_domain.tokens.auth_payload import AuthPayload, UserType
 from ed_domain.utils.jwt import ABCJwtHandler
 from rmediator.decorators import request_handler
@@ -21,7 +22,7 @@ LOG = get_logger()
 class CreateUserVerifyCommandHandler(RequestHandler):
     def __init__(
         self,
-        uow: ABCUnitOfWork,
+        uow: ABCAsyncUnitOfWork,
         jwt: ABCJwtHandler[AuthPayload],
     ):
         self._uow = uow
@@ -39,7 +40,7 @@ class CreateUserVerifyCommandHandler(RequestHandler):
             )
 
         dto = request.dto
-        user = self._uow.auth_user_repository.get(id=dto["user_id"])
+        user = await self._uow.auth_user_repository.get(id=dto["user_id"])
         if not user:
             raise ApplicationException(
                 Exceptions.NotFoundException,
@@ -47,8 +48,8 @@ class CreateUserVerifyCommandHandler(RequestHandler):
                 [f"User with that id = {dto['user_id']} does not exist."],
             )
 
-        otp = self._uow.otp_repository.get(user_id=dto["user_id"])
-        if not otp or otp["action"] != OtpVerificationAction.VERIFY_EMAIL:
+        otp = await self._uow.otp_repository.get(user_id=dto["user_id"])
+        if not otp or otp.otp_type != OtpType.VERIFY_EMAIL:
             raise ApplicationException(
                 Exceptions.BadRequestException,
                 "Otp verification failed.",
@@ -57,7 +58,7 @@ class CreateUserVerifyCommandHandler(RequestHandler):
                 ],
             )
 
-        if otp["value"] != dto["otp"]:
+        if otp.value != dto["otp"]:
             raise ApplicationException(
                 Exceptions.BadRequestException,
                 "Otp verification failed.",
@@ -66,10 +67,10 @@ class CreateUserVerifyCommandHandler(RequestHandler):
 
         token = self._jwt.encode(
             AuthPayload(
-                first_name=user["first_name"],
-                last_name=user["last_name"],
-                email=user.get("email", ""),
-                phone_number=user.get("phone_number", ""),
+                first_name=user.first_name,
+                last_name=user.last_name,
+                email=user.email or "",
+                phone_number=user.phone_number or "",
                 user_type=UserType.DRIVER,
             )
         )

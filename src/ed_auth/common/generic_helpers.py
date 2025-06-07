@@ -18,8 +18,10 @@ def get_config() -> Config:
 
     return {
         "db": {
-            "mongo_db_connection_string": _get_env_variable("CONNECTION_STRING"),
-            "db_name": _get_env_variable("DB_NAME"),
+            "db": _get_env_variable("POSTGRES_DB"),
+            "user": _get_env_variable("POSTGRES_USER"),
+            "password": _get_env_variable("POSTGRES_PASSWORD"),
+            "host": _get_env_variable("POSTGRES_HOST"),
         },
         "rabbitmq": {"url": _get_env_variable("RABBITMQ_URL")},
         "jwt": {

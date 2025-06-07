@@ -1,5 +1,5 @@
-from ed_domain.core.validation import (ABCValidator, ValidationError,
-                                       ValidationErrorType, ValidationResponse)
+from ed_domain.validation import (ABCValidator, ValidationError,
+                                  ValidationErrorType, ValidationResponse)
 from ed_infrastructure.validation.default import (EmailValidator,
                                                   NameValidator,
                                                   PasswordValidator,

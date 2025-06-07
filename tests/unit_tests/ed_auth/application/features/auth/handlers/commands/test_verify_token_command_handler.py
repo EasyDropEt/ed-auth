@@ -10,7 +10,7 @@ PATH = (
 )
 
 generate_fixtures(
-    (f"{PATH}.ABCUnitOfWork", "mock_unit_of_work"),
+    (f"{PATH}.ABCAsyncUnitOfWork", "mock_unit_of_work"),
     (f"{PATH}.ABCJwtHandler", "mock_jwt"),
     (f"{PATH}.VerifyTokenCommand", "mock_verify_token_command"),
 )

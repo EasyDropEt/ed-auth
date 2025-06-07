@@ -2,10 +2,12 @@ from datetime import UTC, datetime
 
 from ed_domain.common.exceptions import ApplicationException, Exceptions
 from ed_domain.common.logging import get_logger
-from ed_domain.core.entities import AuthUser, Otp
+from ed_domain.core.aggregate_roots import AuthUser
+from ed_domain.core.entities import Otp
 from ed_domain.core.entities.notification import NotificationType
-from ed_domain.core.entities.otp import OtpVerificationAction
-from ed_domain.core.repositories.abc_unit_of_work import ABCUnitOfWork
+from ed_domain.core.entities.otp import OtpType
+from ed_domain.persistence.async_repositories.abc_async_unit_of_work import \
+    ABCAsyncUnitOfWork
 from ed_domain.utils.otp import ABCOtpGenerator
 from ed_domain.utils.security.password import ABCPasswordHandler
 from rmediator.decorators import request_handler
@@ -31,7 +33,7 @@ class CreateUserCommandHandler(RequestHandler):
         self,
         rabbitmq_prodcuers: ABCRabbitMQProducers,
         api: ABCApi,
-        uow: ABCUnitOfWork,
+        uow: ABCAsyncUnitOfWork,
         otp: ABCOtpGenerator,
         password: ABCPasswordHandler,
     ):
@@ -58,7 +60,7 @@ class CreateUserCommandHandler(RequestHandler):
         hashed_password = (
             self._password.hash(dto["password"]) if "password" in dto else ""
         )
-        user = self._uow.auth_user_repository.create(
+        user = await self._uow.auth_user_repository.create(
             AuthUser(
                 id=get_new_id(),
                 first_name=dto["first_name"],
@@ -71,26 +73,28 @@ class CreateUserCommandHandler(RequestHandler):
                 update_datetime=datetime.now(UTC),
                 deleted=False,
                 logged_in=False,
+                deleted_datetime=None,
             )
         )
 
-        created_otp = self._uow.otp_repository.create(
+        created_otp = await self._uow.otp_repository.create(
             Otp(
                 id=get_new_id(),
-                user_id=user["id"],
-                action=OtpVerificationAction.VERIFY_EMAIL,
+                user_id=user.id,
+                otp_type=OtpType.VERIFY_EMAIL,
                 create_datetime=datetime.now(UTC),
                 update_datetime=datetime.now(UTC),
                 expiry_datetime=datetime.now(UTC),
                 value=self._otp.generate(),
                 deleted=False,
+                deleted_datetime=None,
             )
         )
 
-        self._rabbitmq_prodcuers.notification.send_notification(
+        await self._rabbitmq_prodcuers.notification.send_notification(
             {
-                "user_id": user["id"],
-                "message": f"Your OTP for logging in is {created_otp['value']}",
+                "user_id": user.id,
+                "message": f"Your OTP for logging in is {created_otp.value}",
                 "notification_type": NotificationType.EMAIL,
             }
         )
