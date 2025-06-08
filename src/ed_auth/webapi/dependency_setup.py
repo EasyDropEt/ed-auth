@@ -18,16 +18,18 @@ from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
 from ed_auth.application.contracts.infrastructure.abc_rabbitmq_producer import \
     ABCRabbitMQProducers
 from ed_auth.application.features.auth.handlers.commands import (
-    CreateUserCommandHandler, CreateUserVerifyCommandHandler,
-    DeleteUserCommandHandler, LoginUserCommandHandler,
-    LoginUserVerifyCommandHandler, VerifyTokenCommandHandler)
+    CreateOrGetUserCommandHandler, CreateUserCommandHandler,
+    CreateUserVerifyCommandHandler, DeleteUserCommandHandler,
+    LoginUserCommandHandler, LoginUserVerifyCommandHandler,
+    VerifyTokenCommandHandler)
 from ed_auth.application.features.auth.handlers.commands.logout_user_command_handler import \
     LogoutUserCommandHandler
 from ed_auth.application.features.auth.handlers.commands.update_user_command_handler import \
     UpdateUserCommandHandler
 from ed_auth.application.features.auth.requests.commands import (
-    CreateUserCommand, CreateUserVerifyCommand, DeleteUserCommand,
-    LoginUserCommand, LoginUserVerifyCommand, VerifyTokenCommand)
+    CreateOrGetUserCommand, CreateUserCommand, CreateUserVerifyCommand,
+    DeleteUserCommand, LoginUserCommand, LoginUserVerifyCommand,
+    VerifyTokenCommand)
 from ed_auth.application.features.auth.requests.commands.logout_user_command import \
     LogoutUserCommand
 from ed_auth.application.features.auth.requests.commands.update_user_command import \
@@ -84,6 +86,10 @@ def mediator(
             CreateUserCommand,
             CreateUserCommandHandler(
                 rabbitmq_producers, api, uow, otp, password),
+        ),
+        (
+            CreateOrGetUserCommand,
+            CreateOrGetUserCommandHandler(uow),
         ),
         (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
         (LoginUserCommand, LoginUserCommandHandler(api, uow, otp, password)),

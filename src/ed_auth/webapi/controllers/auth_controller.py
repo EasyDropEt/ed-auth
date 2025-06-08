@@ -10,14 +10,28 @@ from ed_auth.application.features.auth.dtos import (CreateUserDto,
                                                     LogoutDto,
                                                     UnverifiedUserDto, UserDto,
                                                     VerifyTokenDto)
+from ed_auth.application.features.auth.dtos.create_or_get_user_dto import \
+    CreateOrGetUserDto
 from ed_auth.application.features.auth.requests.commands import (
     CreateUserCommand, CreateUserVerifyCommand, LoginUserCommand,
     LoginUserVerifyCommand, LogoutUserCommand, VerifyTokenCommand)
+from ed_auth.application.features.auth.requests.commands.create_or_get_user_command import \
+    CreateOrGetUserCommand
 from ed_auth.webapi.common.helpers import GenericResponse, rest_endpoint
 from ed_auth.webapi.dependency_setup import mediator
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 LOG = get_logger()
+
+
+@router.post(
+    "/create-or-get/consumer", response_model=GenericResponse[CreateOrGetUserDto]
+)
+@rest_endpoint
+async def create_or_get_user_get_otp(
+    request: CreateUserDto, mediator: Annotated[Mediator, Depends(mediator)]
+):
+    return await mediator.send(CreateOrGetUserCommand(dto=request))
 
 
 @router.post("/create/get-otp", response_model=GenericResponse[UnverifiedUserDto])
