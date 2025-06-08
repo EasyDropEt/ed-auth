@@ -1,3 +1,5 @@
+from ed_auth.application.features.auth.requests.commands.create_or_get_user_command import \
+    CreateOrGetUserCommand
 from ed_auth.application.features.auth.requests.commands.create_user_command import \
     CreateUserCommand
 from ed_auth.application.features.auth.requests.commands.create_user_verify_command import \
@@ -17,6 +19,7 @@ from ed_auth.application.features.auth.requests.commands.verify_token_command im
 
 __all__ = [
     "CreateUserCommand",
+    "CreateOrGetUserCommand",
     "CreateUserVerifyCommand",
     "DeleteUserCommand",
     "LoginUserCommand",

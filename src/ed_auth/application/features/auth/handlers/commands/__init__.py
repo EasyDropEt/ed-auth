@@ -1,3 +1,5 @@
+from ed_auth.application.features.auth.handlers.commands.create_or_get_user_command_handler import \
+    CreateOrGetUserCommandHandler
 from ed_auth.application.features.auth.handlers.commands.create_user_command_handler import \
     CreateUserCommandHandler
 from ed_auth.application.features.auth.handlers.commands.create_user_verify_command_handler import \
@@ -16,6 +18,7 @@ from ed_auth.application.features.auth.handlers.commands.verify_token_command_ha
     VerifyTokenCommandHandler
 
 __all__ = [
+    "CreateOrGetUserCommandHandler",
     "CreateUserCommandHandler",
     "CreateUserVerifyCommandHandler",
     "DeleteUserCommandHandler",
