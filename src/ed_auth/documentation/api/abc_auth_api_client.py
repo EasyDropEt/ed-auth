@@ -3,19 +3,24 @@ from uuid import UUID
 
 from ed_domain.documentation.api.definitions import ApiResponse
 
-from ed_auth.application.features.auth.dtos import (CreateUserDto,
+from ed_auth.application.features.auth.dtos import (CreateOrGetUserDto,
+                                                    CreateUserDto,
                                                     CreateUserVerifyDto,
                                                     LoginUserDto,
                                                     LoginUserVerifyDto,
                                                     LogoutDto,
-                                                    UnverifiedUserDto, UserDto,
+                                                    UnverifiedUserDto,
+                                                    UpdateUserDto, UserDto,
                                                     VerifyTokenDto)
-from ed_auth.application.features.auth.dtos.update_user_dto import \
-    UpdateUserDto
 
 
 class ABCAuthApiClient(metaclass=ABCMeta):
     # Auth features
+    @abstractmethod
+    async def create_or_get_user(
+        self, create_user_dto: CreateUserDto
+    ) -> ApiResponse[CreateOrGetUserDto]: ...
+
     @abstractmethod
     async def create_get_otp(
         self, create_user_dto: CreateUserDto

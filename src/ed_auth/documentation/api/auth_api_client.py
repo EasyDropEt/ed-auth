@@ -3,15 +3,15 @@ from uuid import UUID
 from ed_domain.documentation.api.definitions import ApiResponse
 from ed_infrastructure.documentation.api.endpoint_client import EndpointClient
 
-from ed_auth.application.features.auth.dtos import (CreateUserDto,
+from ed_auth.application.features.auth.dtos import (CreateOrGetUserDto,
+                                                    CreateUserDto,
                                                     CreateUserVerifyDto,
                                                     LoginUserDto,
                                                     LoginUserVerifyDto,
-                                                    UnverifiedUserDto, UserDto,
+                                                    LogoutDto,
+                                                    UnverifiedUserDto,
+                                                    UpdateUserDto, UserDto,
                                                     VerifyTokenDto)
-from ed_auth.application.features.auth.dtos.logout_dto import LogoutDto
-from ed_auth.application.features.auth.dtos.update_user_dto import \
-    UpdateUserDto
 from ed_auth.documentation.api.abc_auth_api_client import ABCAuthApiClient
 from ed_auth.documentation.api.auth_endpoint_descriptions import \
     AuthEndpointDescriptions
@@ -20,6 +20,14 @@ from ed_auth.documentation.api.auth_endpoint_descriptions import \
 class AuthApiClient(ABCAuthApiClient):
     def __init__(self, auth_api: str) -> None:
         self._driver_endpoints = AuthEndpointDescriptions(auth_api)
+
+    async def create_or_get_user(
+        self, create_user_dto: CreateUserDto
+    ) -> ApiResponse[CreateOrGetUserDto]:
+        endpoint = self._driver_endpoints.get_description("create_get_otp")
+        api_client = EndpointClient[CreateOrGetUserDto](endpoint)
+
+        return await api_client({"request": create_user_dto})
 
     async def create_get_otp(
         self, create_user_dto: CreateUserDto
@@ -82,3 +90,7 @@ class AuthApiClient(ABCAuthApiClient):
         return await api_client(
             {"request": update_user_dto, "path_params": {"user_id": str(id)}}
         )
+
+
+if __name__ == "__main__":
+    AuthApiClient("")

@@ -3,15 +3,15 @@ from ed_domain.documentation.api.abc_endpoint_descriptions import \
 from ed_domain.documentation.api.definitions import (EndpointDescription,
                                                      HttpMethod)
 
-from ed_auth.application.features.auth.dtos import (CreateUserDto,
+from ed_auth.application.features.auth.dtos import (CreateOrGetUserDto,
+                                                    CreateUserDto,
                                                     CreateUserVerifyDto,
                                                     LoginUserDto,
                                                     LoginUserVerifyDto,
                                                     LogoutDto,
-                                                    UnverifiedUserDto, UserDto,
+                                                    UnverifiedUserDto,
+                                                    UpdateUserDto, UserDto,
                                                     VerifyTokenDto)
-from ed_auth.application.features.auth.dtos.update_user_dto import \
-    UpdateUserDto
 
 
 class AuthEndpointDescriptions(ABCEndpointDescriptions):
@@ -19,6 +19,13 @@ class AuthEndpointDescriptions(ABCEndpointDescriptions):
         self._base_url = base_url
         self._descriptions: list[EndpointDescription] = [
             # Auth endpoints
+            {
+                "name": "create_or_get_user",
+                "method": HttpMethod.POST,
+                "path": f"{self._base_url}/auth/create-or-get/consumer",
+                "request_model": CreateUserDto,
+                "response_model": CreateOrGetUserDto,
+            },
             {
                 "name": "create_get_otp",
                 "method": HttpMethod.POST,
