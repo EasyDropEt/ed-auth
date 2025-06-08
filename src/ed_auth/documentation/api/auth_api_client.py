@@ -24,7 +24,7 @@ class AuthApiClient(ABCAuthApiClient):
     async def create_or_get_user(
         self, create_user_dto: CreateUserDto
     ) -> ApiResponse[CreateOrGetUserDto]:
-        endpoint = self._driver_endpoints.get_description("create_get_otp")
+        endpoint = self._driver_endpoints.get_description("create_or_get_user")
         api_client = EndpointClient[CreateOrGetUserDto](endpoint)
 
         return await api_client({"request": create_user_dto})
