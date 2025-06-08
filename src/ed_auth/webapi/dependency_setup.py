@@ -70,9 +70,6 @@ def get_password(config: Annotated[Config, Depends(get_config)]) -> ABCPasswordH
 
 
 def mediator(
-    rabbitmq_producers: Annotated[
-        ABCRabbitMQProducers, Depends(get_rabbitmq_producers)
-    ],
     api: Annotated[ABCApi, Depends(get_api_client)],
     uow: Annotated[ABCAsyncUnitOfWork, Depends(get_uow)],
     jwt: Annotated[ABCJwtHandler, Depends(get_jwt)],
@@ -84,8 +81,7 @@ def mediator(
     auth_handlers = [
         (
             CreateUserCommand,
-            CreateUserCommandHandler(
-                rabbitmq_producers, api, uow, otp, password),
+            CreateUserCommandHandler(api, uow, otp, password),
         ),
         (
             CreateOrGetUserCommand,

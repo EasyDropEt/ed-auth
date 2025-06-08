@@ -31,13 +31,11 @@ LOG = get_logger()
 class CreateUserCommandHandler(RequestHandler):
     def __init__(
         self,
-        rabbitmq_prodcuers: ABCRabbitMQProducers,
         api: ABCApi,
         uow: ABCAsyncUnitOfWork,
         otp: ABCOtpGenerator,
         password: ABCPasswordHandler,
     ):
-        self._rabbitmq_prodcuers = rabbitmq_prodcuers
         self._api = api
         self._uow = uow
         self._otp = otp
@@ -93,7 +91,7 @@ class CreateUserCommandHandler(RequestHandler):
                 )
             )
 
-        await self._rabbitmq_prodcuers.notification.send_notification(
+        await self._api.notification_api.send_notification(
             {
                 "user_id": user.id,
                 "message": f"Your OTP for logging in is {created_otp.value}",
