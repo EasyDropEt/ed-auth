@@ -43,10 +43,10 @@ from ed_auth.infrastructure.rabbitmq_producers import RabbitMQProducers
 async def get_rabbitmq_producers(
     config: Annotated[Config, Depends(get_config)],
 ) -> ABCRabbitMQProducers:
-    p = RabbitMQProducers(config)
-    await p.start()
+    producers = RabbitMQProducers(config)
+    await producers.start()
 
-    return p
+    return producers
 
 
 def get_api_client(config: Annotated[Config, Depends(get_config)]) -> ABCApi:
