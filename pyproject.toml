@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ed-auth"
-version = "0.2.8"
+version = "0.2.10"
 description = ""
 authors = ["ffekirnew <ffekirnew0808@gmail.com>"]
 license = "MIT"
