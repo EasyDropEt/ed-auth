@@ -1,8 +1,8 @@
-from datetime import UTC, datetime, timedelta
+from typing import Optional
 
 from ed_domain.common.exceptions import ApplicationException, Exceptions
 from ed_domain.common.logging import get_logger
-from ed_domain.core.entities import Otp
+from ed_domain.core.aggregate_roots import AuthUser
 from ed_domain.core.entities.notification import NotificationType
 from ed_domain.core.entities.otp import OtpType
 from ed_domain.persistence.async_repositories.abc_async_unit_of_work import \
@@ -14,13 +14,15 @@ from rmediator.types import RequestHandler
 
 from ed_auth.application.common.responses.base_response import BaseResponse
 from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
+from ed_auth.application.contracts.infrastructure.abc_email_templater import \
+    ABCEmailTemplater
 from ed_auth.application.features.auth.dtos.unverified_user_dto import \
     UnverifiedUserDto
 from ed_auth.application.features.auth.dtos.validators.login_user_dto_validator import \
     LoginUserDtoValidator
 from ed_auth.application.features.auth.requests.commands.login_user_command import \
     LoginUserCommand
-from ed_auth.common.generic_helpers import get_new_id
+from ed_auth.application.services.otp_service import CreateOtpDto, OtpService
 
 LOG = get_logger()
 
@@ -33,12 +35,19 @@ class LoginUserCommandHandler(RequestHandler):
         uow: ABCAsyncUnitOfWork,
         otp: ABCOtpGenerator,
         password: ABCPasswordHandler,
+        email_templater: ABCEmailTemplater,
     ):
         self._api = api
         self._uow = uow
         self._otp = otp
         self._password = password
+        self._email_templater = email_templater
+
         self._dto_validator = LoginUserDtoValidator()
+        self._otp_service = OtpService(uow)
+
+        self._error_message = "Login failed."
+        self._success_message = "Login successful. A one time password been sent."
 
     async def handle(
         self, request: LoginUserCommand
@@ -48,7 +57,7 @@ class LoginUserCommandHandler(RequestHandler):
         if not dto_validator.is_valid:
             raise ApplicationException(
                 Exceptions.ValidationException,
-                "Login failed.",
+                self._error_message,
                 dto_validator.errors,
             )
 
@@ -57,52 +66,21 @@ class LoginUserCommandHandler(RequestHandler):
         )
 
         async with self._uow.transaction():
-            user = (
-                await self._uow.auth_user_repository.get(email=email)
-                if email
-                else await self._uow.auth_user_repository.get(phone_number=phone_number)
+            user = await self._verify_user_is_not_none(email, phone_number)
+            await self._verify_password(
+                user.password_hash, request.dto.get("password", None)
             )
-
-            if user is None:
-                raise ApplicationException(
-                    Exceptions.NotFoundException,
-                    "Login failed.",
-                    ["No user found with the given credentials."],
-                )
-
-            if user.password_hash:
-                if "password" not in request.dto:
-                    raise ApplicationException(
-                        Exceptions.BadRequestException,
-                        "Login failed.",
-                        ["Password is required."],
-                    )
-
-                if not self._password.verify(
-                    request.dto["password"], user.password_hash
-                ):
-                    raise ApplicationException(
-                        Exceptions.BadRequestException,
-                        "Login failed.",
-                        ["Password is incorrect."],
-                    )
 
             if previously_sent_otp := await self._uow.otp_repository.get(
                 user_id=user.id
             ):
                 await self._uow.otp_repository.delete(previously_sent_otp.id)
 
-            created_otp = await self._uow.otp_repository.create(
-                Otp(
-                    id=get_new_id(),
+            created_otp = await self._otp_service.create(
+                CreateOtpDto(
                     user_id=user.id,
-                    otp_type=OtpType.LOGIN,
-                    create_datetime=datetime.now(UTC),
-                    update_datetime=datetime.now(UTC),
-                    expiry_datetime=datetime.now(UTC) + timedelta(minutes=2),
                     value=self._otp.generate(),
-                    deleted=False,
-                    deleted_datetime=None,
+                    otp_type=OtpType.LOGIN,
                 )
             )
 
@@ -111,24 +89,59 @@ class LoginUserCommandHandler(RequestHandler):
         notification_response = await self._api.notification_api.send_notification(
             {
                 "user_id": user.id,
-                "message": f"Your OTP for logging in is {created_otp.value}",
+                "message": self._email_templater.login(
+                    user.first_name, created_otp.value
+                ),
                 "notification_type": NotificationType.EMAIL,
             }
         )
 
-        LOG.info(
-            f"Notification response for user {user.id}: {notification_response}")
+        LOG.info(f"Notification response for user {user.id}")
         if not notification_response["is_success"]:
             LOG.error(
                 f"Failed to send OTP to user {user.id}: {notification_response['errors']}"
             )
             raise ApplicationException(
                 Exceptions.InternalServerException,
-                "Login failed.",
-                ["Failed to send OTP."],
+                self._error_message,
+                ["System failed to send OTP."],
             )
 
         return BaseResponse[UnverifiedUserDto].success(
-            "Otp sent successfully.",
+            self._success_message,
             UnverifiedUserDto(**user.__dict__),
         )
+
+    async def _verify_user_is_not_none(self, email: str, phone_number: str) -> AuthUser:
+        user = (
+            await self._uow.auth_user_repository.get(email=email)
+            if email
+            else await self._uow.auth_user_repository.get(phone_number=phone_number)
+        )
+
+        if user is None:
+            raise ApplicationException(
+                Exceptions.NotFoundException,
+                self._error_message,
+                ["No user found with the given credentials."],
+            )
+
+        return user
+
+    async def _verify_password(
+        self, password_hash: str, password: Optional[str]
+    ) -> None:
+        if password_hash:
+            if password is None:
+                raise ApplicationException(
+                    Exceptions.BadRequestException,
+                    self._error_message,
+                    ["Password is required."],
+                )
+
+            if not self._password.verify(password, password_hash):
+                raise ApplicationException(
+                    Exceptions.BadRequestException,
+                    self._error_message,
+                    ["Password is incorrect."],
+                )

@@ -15,6 +15,8 @@ from fastapi import Depends
 from rmediator.mediator import Mediator
 
 from ed_auth.application.contracts.infrastructure.abc_api import ABCApi
+from ed_auth.application.contracts.infrastructure.abc_email_templater import \
+    ABCEmailTemplater
 from ed_auth.application.contracts.infrastructure.abc_rabbitmq_producer import \
     ABCRabbitMQProducers
 from ed_auth.application.features.auth.handlers.commands import (
@@ -37,6 +39,7 @@ from ed_auth.application.features.auth.requests.commands.update_user_command imp
 from ed_auth.common.generic_helpers import get_config
 from ed_auth.common.typing.config import Config, Environment
 from ed_auth.infrastructure.api_handler import ApiHandler
+from ed_auth.infrastructure.email_templater import EmailTemplater
 from ed_auth.infrastructure.rabbitmq_producers import RabbitMQProducers
 
 
@@ -47,6 +50,10 @@ async def get_rabbitmq_producers(
     await producers.start()
 
     return producers
+
+
+def email_templater() -> ABCEmailTemplater:
+    return EmailTemplater()
 
 
 def get_api_client(config: Annotated[Config, Depends(get_config)]) -> ABCApi:
@@ -70,6 +77,7 @@ def get_password(config: Annotated[Config, Depends(get_config)]) -> ABCPasswordH
 
 
 def mediator(
+    email_templater: Annotated[ABCEmailTemplater, Depends(email_templater)],
     api: Annotated[ABCApi, Depends(get_api_client)],
     uow: Annotated[ABCAsyncUnitOfWork, Depends(get_uow)],
     jwt: Annotated[ABCJwtHandler, Depends(get_jwt)],
@@ -81,14 +89,17 @@ def mediator(
     auth_handlers = [
         (
             CreateUserCommand,
-            CreateUserCommandHandler(api, uow, otp, password),
+            CreateUserCommandHandler(uow, otp, password),
         ),
         (
             CreateOrGetUserCommand,
             CreateOrGetUserCommandHandler(uow),
         ),
         (CreateUserVerifyCommand, CreateUserVerifyCommandHandler(uow, jwt)),
-        (LoginUserCommand, LoginUserCommandHandler(api, uow, otp, password)),
+        (
+            LoginUserCommand,
+            LoginUserCommandHandler(api, uow, otp, password, email_templater),
+        ),
         (LoginUserVerifyCommand, LoginUserVerifyCommandHandler(uow, jwt)),
         (LogoutUserCommand, LogoutUserCommandHandler(uow, jwt)),
         (VerifyTokenCommand, VerifyTokenCommandHandler(uow, jwt)),
