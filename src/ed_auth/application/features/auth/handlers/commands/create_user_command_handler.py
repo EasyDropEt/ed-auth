@@ -49,15 +49,15 @@ class CreateUserCommandHandler(RequestHandler):
             )
 
         async with self._uow.transaction():
-            # if "phone_number" in dto and await self._user_service.get_by_phone_number(
-            #     dto["phone_number"]
-            # ):
-            #     raise ApplicationException(
-            #         Exceptions.ConflictException,
-            #         self._error_message,
-            #         ["Another user exists with this phone number."],
-            #     )
-            #
+            if "phone_number" in dto and await self._user_service.get_by_phone_number(
+                dto["phone_number"]
+            ):
+                raise ApplicationException(
+                    Exceptions.ConflictException,
+                    self._error_message,
+                    ["Another user exists with this phone number."],
+                )
+
             # if "email" in dto and await self._user_service.get_by_email(dto["email"]):
             #     raise ApplicationException(
             #         Exceptions.ConflictException,
