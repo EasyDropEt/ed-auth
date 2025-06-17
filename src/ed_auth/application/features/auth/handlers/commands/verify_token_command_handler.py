@@ -20,13 +20,16 @@ class VerifyTokenCommandHandler(RequestHandler):
         self._uow = uow
         self._jwt = jwt
 
+        self._error_message = "Token validation failed."
+        self._success_message = "Token validated."
+
     async def handle(self, request: VerifyTokenCommand) -> BaseResponse[UserDto]:
         payload = self._jwt.decode(request.dto["token"])
 
         if "email" not in payload:
             raise ApplicationException(
                 Exceptions.UnauthorizedException,
-                "Token validation failed.",
+                self._error_message,
                 ["Token is malformed."],
             )
 
@@ -38,21 +41,18 @@ class VerifyTokenCommandHandler(RequestHandler):
             if user is None:
                 raise ApplicationException(
                     Exceptions.UnauthorizedException,
-                    "Token validation failed.",
+                    self._error_message,
                     ["User not found."],
                 )
 
             if not user.logged_in:
                 raise ApplicationException(
                     Exceptions.UnauthorizedException,
-                    "Token validation failed.",
+                    self._error_message,
                     ["User is not logged in."],
                 )
 
             return BaseResponse[UserDto].success(
-                "Token validated.",
-                UserDto(
-                    **user.__dict__,
-                    token=request.dto["token"],
-                ),
+                self._success_message,
+                UserDto(**user.__dict__, token=request.dto["token"]),
             )

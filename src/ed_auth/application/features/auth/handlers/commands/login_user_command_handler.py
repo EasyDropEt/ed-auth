@@ -71,10 +71,9 @@ class LoginUserCommandHandler(RequestHandler):
                 user.password_hash, request.dto.get("password", None)
             )
 
-            if previously_sent_otp := await self._uow.otp_repository.get(
-                user_id=user.id
-            ):
-                await self._uow.otp_repository.delete(previously_sent_otp.id)
+            if prev_otps := await self._uow.otp_repository.get_all(user_id=user.id):
+                for prev_otp in prev_otps:
+                    await self._uow.otp_repository.delete(id=prev_otp.id)
 
             created_otp = await self._otp_service.create(
                 CreateOtpDto(
