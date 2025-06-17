@@ -31,7 +31,9 @@ class VerifyTokenCommandHandler(RequestHandler):
             )
 
         async with self._uow.transaction():
-            user = await self._uow.auth_user_repository.get(email=payload["email"])
+            user = await self._uow.auth_user_repository.get(
+                phone_number=payload["phone_number"]
+            )
 
             if user is None:
                 raise ApplicationException(
