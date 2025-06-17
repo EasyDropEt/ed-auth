@@ -47,7 +47,6 @@ class LoginUserVerifyCommandHandler(RequestHandler):
                 )
 
             otp = await self._uow.otp_repository.get(user_id=dto["user_id"])
-
             if not otp or otp.otp_type != OtpType.LOGIN:
                 raise ApplicationException(
                     Exceptions.BadRequestException,
@@ -75,6 +74,7 @@ class LoginUserVerifyCommandHandler(RequestHandler):
             )
 
             user.log_in()
+            await self._uow.otp_repository.delete(otp.id)
             await self._uow.auth_user_repository.update(user.id, user)
 
         return BaseResponse[UserDto].success(
